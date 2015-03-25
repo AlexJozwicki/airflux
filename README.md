@@ -175,7 +175,7 @@ class RequestStore extends airflux.Store {
             }
         })
     }
-});
+};
 
 new RequestStore();
 ```

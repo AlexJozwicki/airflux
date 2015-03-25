@@ -25,4 +25,3 @@ node_modules
 # Build artifacts
 tmp
 bower_components
-dist
