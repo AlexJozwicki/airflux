@@ -1,0 +1,16 @@
+{
+    "maxerr": 50,
+
+    "curly": true,
+    "unused": false,
+    "undef": true,
+    "proto": true,
+
+    "browser": true,
+    "devel": true,
+    "node": true,
+    "esnext": true,
+
+    "globals": {
+    }
+}
