@@ -130,56 +130,6 @@ class Publisher {
                .catch( ( error ) => this.failed( error ) );
     }
 
-    /**
-     * Subscribes the given callback for action triggered, which should
-     * return a promise that in turn is passed to `this.promise`
-     *
-     * @param {Function} callback The callback to register as event handler
-     */
-    listenAndPromise( callback, bindContext, resolver ) {
-        var me = this;
-        bindContext = bindContext || this;
-        this.willCallPromise = (this.willCallPromise || 0) + 1;
-
-        var removeListen = this.listen(function() {
-            if (!callback) {
-                throw new Error('Expected a function returning a promise but got ' + callback);
-            }
-
-            var args = arguments,
-                promise = callback.apply(bindContext, args);
-            return me.promise.call(me, promise);
-        }, bindContext);
-
-        return function () {
-          me.willCallPromise--;
-          removeListen.call(me);
-        };
-    }
-
-    /**
-     * EXPERIMENT
-     */
-    listenAndFetchJson( callback, bindContext ) {
-        var me = this;
-        bindContext = bindContext || this;
-        this.willCallPromise = (this.willCallPromise || 0) + 1;
-
-        var removeListen = this.listen(function() {
-            if (!callback) {
-                throw new Error('Expected a function returning a promise but got ' + callback);
-            }
-
-            var args = arguments,
-                promise = callback.apply(bindContext, args);
-            return me.fetchJson.call(me, promise);
-        }, bindContext);
-
-        return function () {
-          me.willCallPromise--;
-          removeListen.call(me);
-        };
-    }
 
     /**
      * Attach handlers to promise that trigger the completed and failed
