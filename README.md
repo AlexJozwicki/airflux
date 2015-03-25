@@ -15,7 +15,6 @@ You can read an overview of Flux [here](http://facebook.github.io/react/docs/flu
 
 ```
 
-The pattern is composed of actions and data stores, where actions initiate new data to pass through data stores before coming back to the view components again. If a view component has an event that needs to make a change in the application's data stores, they need to do so by signalling to the stores through the actions available.
 
 ## Content
 
@@ -33,15 +32,16 @@ The pattern is composed of actions and data stores, where actions initiate new d
 
 The latest release is always downloadable from GitHub: [AlexJozwicki/airflux/releases](https://github.com/AlexJozwicki/airflux/releases).
 
-Like React, Airflux depends on an ES5-shim for older browsers. [Kriskowal's es5-shim](https://github.com/kriskowal/es5-shim) provides everything required.
-
 [Back to top](#content)
 
-## Comparing Airflux with Facebook Flux
+## Yet another Flux library
 
-The goal of the Airflux project is to get this architecture easily up and running in your web application, both client-side or server-side. There are some differences between how this project works and how Facebook's proposed Flux architecture works:
+The Airflux project is a ES6 class-based fork of Reflux, helped by the work done on Fluo.
+The goal is to allow to create new projects entirely based on ES6 classes, both on the React side and Flux side.
 
-You can read more in this [blog post about React Flux vs Reflux (Airflux)](http://spoike.ghost.io/deconstructing-reactjss-flux/).
+Having a class based approach allows to have a cleaner implementation of both the airflux library and the final application stores.
+
+As such, this project aims to be used only by React 0.13 ES6 style componenents and drops the support for mixins completely.
 
 
 ### Similarities with Flux
@@ -89,12 +89,10 @@ var statusUpdate = new airflux.Action(options);
 An action is a [functor](http://en.wikipedia.org/wiki/Function_object) that can be invoked like any function.
 
 ```javascript
-statusUpdate(data); // Invokes the action statusUpdate
-statusUpdate.trigger(data); // same effect as above
+statusUpdate( data ); // Invokes the action statusUpdate
 ```
 
 If `options.sync` is true, the functor will instead call `action.triggerSync()` which is a synchronous operation.
-
 
 
 #### Asynchronous actions
@@ -145,7 +143,7 @@ asyncResultAction.listen( ( arguments ) =>
         .catch( asyncResultAction.failed );
 );
 
-asyncResultAction.listen( ( arguments ) => asyncResultAction.promise( someAsyncOperation( arguments ) ) );
+asyncResultAction.listen( ( arguments ) => asyncResultAction.promise( someAsyncOperation( arguments ) ) );
 
 asyncResultAction.listen( someAsyncOperation );
 ```
@@ -176,8 +174,6 @@ class RequestStore extends airflux.Store {
         })
     }
 };
-
-new RequestStore();
 ```
 
 Then, on the server, you could use promises to make the request and either render or serve an error:
@@ -201,10 +197,8 @@ There are a couple of hooks available for each action.
 Example usage:
 
 ```javascript
-actions.statusUpdate.preEmit = function() { console.log( arguments ); };
-actions.statusUpdate.shouldEmit = function( value ) {
-    return ( value > 0 );
-};
+actions.statusUpdate.preEmit = () => { console.log( arguments ); };
+actions.statusUpdate.shouldEmit = ( value ) => value > 0;
 
 actions.statusUpdate( 0 );
 actions.statusUpdate( 1 );
@@ -215,8 +209,8 @@ You can also set the hooks by sending them in a definition object as you create 
 
 ```javascript
 var action = new airflux.Action({
-    preEmit: function() { /* ... */ },
-    shouldEmit: function() { /* ... */ }
+    preEmit: () => { /* ... */ },
+    shouldEmit: () => { /* ... */ }
 });
 ```
 
@@ -224,7 +218,7 @@ var action = new airflux.Action({
 
 ### Creating data stores
 
-The recommended way to create stores is by extending the `airflux.Store` class.
+Creating stores is done by extending the `airflux.Store` class.
 
 ```javascript
 class StatusStore {
@@ -238,8 +232,6 @@ class StatusStore {
         this.trigger(status);
     }
 }
-
-var statusStore = new StatusStore();
 ```
 
 In the above example, whenever the action is called, the store's `output()` callback will be called with whatever parameters was sent in the action. E.g. if the action is called as `statusUpdate(true)` then the `flag` argument in `output()` method call is `true`.
@@ -271,7 +263,7 @@ class Store extends airflux.Store {
     onMagicMissile() {
         // bzzzzapp!
     }
-});
+}
 ```
 
 ...you can do this:
@@ -280,7 +272,7 @@ class Store extends airflux.Store {
 class Store extends airflux.Store {
     constructor() {
         super();
-        this.listenToMany(actions);
+        this.listenToMany( actions );
     }
 
     onFireBall() {
@@ -290,7 +282,7 @@ class Store extends airflux.Store {
     onMagicMissile() {
         // bzzzzapp!
     }
-});
+}
 ```
 
 This will add listeners to all actions `actionName` who have a corresponding `onActionName()` (or `actionName` if you prefer) method in the store. Thus if the `actions` object should also have included an `iceShard` spell, that would simply be ignored.
@@ -298,12 +290,12 @@ This will add listeners to all actions `actionName` who have a corresponding `on
 
 ### Listening to Stores
 
+Since stores can also be listened too, they can publish data.
+Stores can have a getter `state`. The mehtod `publishState` always publishes the value of `state` to all listeners.
+`FluxComponent` that listen to stores will receive this value. When using the shorthand setting the state of the component automatically, `FluxComponent` will set the initial state of the component to the current one of the store.
+
 ```javascript
 class StatefulStore extends airflux.Store {
-    constructor() {
-        super();
-    }
-
     get state() {
         return 'data';
     }
@@ -344,26 +336,33 @@ status:  OFFLINE
 
 [Back to top](#content)
 
+
 ### React component example
 
-Register your component to listen for changes in your data stores, preferably in the `componentDidMount()` [lifecycle method](http://facebook.github.io/react/docs/component-specs.html) and unregister in the `componentWillUnmount()`, like this:
+Using airflux inside your React component can be done in three ways: 
+- manually or by doing a pimpl of Listener
+- by extending FluxComponent
+
+#### Manually
+
+The React component needs to start listening on `componentDidMount` and stop listening on `componentWillUnmount`.
 
 ```javascript
 class Status extends React.Component {
-    onStatusChange(status) {
-        this.setState({
-            currentStatus: status
-        });
-    }
-    componentDidMount() {
-        this.unsubscribe = statusStore.listen(this.onStatusChange);
-    }
-    componentWillUnmount() {
-        this.unsubscribe();
-    }
-    render() {
-        // render specifics
-    }
+     onStatusChange(status) {
+          this.setState({
+               currentStatus: status
+          });
+     }
+     componentDidMount() {
+          this.unsubscribe = statusStore.listen(this.onStatusChange);
+     }
+     componentWillUnmount() {
+          this.unsubscribe();
+     }
+     render() {
+          // render specifics
+     }
 }
 ```
 
@@ -372,12 +371,12 @@ class Status extends React.Component {
 You always need to unsubscribe components from observed actions and stores upon unmounting. To simplify this process you can use FluxComponent, which will subscribe and unsubscribes automatically.
 
 ```javascript
-class Status extends AirFlux.FluxComponent {
+class Status extends airflux.FluxComponent {
     constructor( props ) {
-        super( props, { onStatusChange: statusStore } );
+        super( props, { statusChanged: statusStore } );
     }
 
-    onStatusChange(status) {
+    statusChanged( status ) {
         this.setState({
             currentStatus: status
         });
@@ -404,9 +403,6 @@ class Status extends airflux.FluxComponent {
     }
 };
 ```
-
-When listening to stores, FluxComponent will map the `state` getter of the Store to the state of the component.
-
 
 ### Listening to changes in other data stores (aggregate data stores)
 
