@@ -2,11 +2,12 @@
   "name": "airflux",
   "version": "0.1.0",
   "description": "A pure ES6 fork of the Reflux data flow library similar to Facebook Flux",
-  "main": "dist/airflux.js",
+  "main": "src",
   "scripts": {
     "test": "grunt test",
     "benchmark": "node test/benchmarks",
-    "build": "grunt build"
+    "build": "grunt build",
+    "build-npm": "rm -rf build/npm && babel -d build/npm/lib ./src && cp README.md build/npm && find -X build/npm/lib -type d -name __tests__ | xargs rm -rf && node -p 'p=require(\"./package\");p.main=\"lib\";p.scripts=p.devDependencies=undefined;JSON.stringify(p,null,2)' > build/npm/package.json"
   },
   "author": "Alexandre Jozwicki",
   "contributors": [
@@ -32,7 +33,6 @@
     "react": "0.13.x"
   },
   "devDependencies": {
-    "react": "0.13.x",
     "babel": "^4.7.16",
     "babelify": "^5.0.4",
     "benchmark": "^1.0.0",
@@ -40,6 +40,7 @@
     "chai": "^1.9.1",
     "chai-as-promised": "^4.1.1",
     "grunt": "^0.4.5",
+    "grunt-babel": "^4.0.0",
     "grunt-browserify": "^2.1.4",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-uglify": "^0.5.0",
@@ -55,6 +56,7 @@
     "karma-spec-reporter": "0.0.13",
     "matchdep": "^0.3.0",
     "mocha": "^1.21.3",
+    "react": "0.13.x",
     "sinon": "^1.10.3"
   }
 }

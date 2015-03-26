@@ -11,7 +11,7 @@ class Publisher {
     constructor() {
         this.emitter = new _.EventEmitter();
         this.children = [];
-        this.dispatchPromises_ = [];
+        this._dispatchPromises = [];
     }
 
     get eventType() { return 'event'; }
@@ -70,7 +70,7 @@ class Publisher {
                     return;
                 }
 
-                self.dispatchPromises_.push({
+                self._dispatchPromises.push({
                     promise: result,
                     listener: callback
                 });
@@ -206,7 +206,7 @@ class Publisher {
         }
 
         if (this.shouldEmit.apply(this, args)) {
-            this.dispatchPromises_ = [];
+            this._dispatchPromises = [];
             this.emitter.emit(this.eventType, args);
             // Note: To support mixins, we need to access the method this way.
             //   Overrides are not possible.
@@ -261,8 +261,8 @@ class Publisher {
 
 
     _handleDispatchPromises() {
-        var promises = this.dispatchPromises_;
-        this.dispatchPromises_ = [];
+        var promises = this._dispatchPromises;
+        this._dispatchPromises = [];
 
         if (promises.length === 0) {
             return;

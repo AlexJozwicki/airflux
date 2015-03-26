@@ -2,10 +2,11 @@ var _           = require( './utils' );
 var JoinStores  = require( './JoinStores' );
 
 
-exports.Action      = require('./Action');
-exports.Listener    = require('./Listener');
-exports.Publisher   = require('./Publisher');
-exports.Store       = require('./Store');
+exports.Action          = require('./Action');
+exports.Listener        = require('./Listener');
+exports.Publisher       = require('./Publisher');
+exports.Store           = require('./Store');
+exports.FluxComponent   = require('./FluxComponent');
 
 
 exports.joinTrailing    = exports.all = JoinStores.JoinTrailing;
@@ -14,8 +15,8 @@ exports.joinStrict      = JoinStores.JoinStrict;
 exports.joinConcat      = JoinStores.JoinConcat;
 
 
-exports.EventEmitter = _.EventEmitter;
-exports.Promise = _.Promise;
+exports.EventEmitter    = _.EventEmitter;
+exports.Promise         = _.Promise;
 
 
 /**
