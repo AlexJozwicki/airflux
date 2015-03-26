@@ -24,7 +24,7 @@ var Store = (function (_Listener) {
 
     _createClass(Store, {
         eventType: {
-            get: function () {
+            get: function () /*:string*/{
                 return "change";
             }
         },

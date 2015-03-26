@@ -11,6 +11,10 @@ var _ = require("./utils");
  */
 
 var Publisher = (function () {
+    /*:: emitter            : any;*/
+    /*:: children           : Array< any >;*/
+    /*:: _dispatchPromises  : Array< any >;*/
+
     /**
      * @protected
      */
@@ -20,17 +24,17 @@ var Publisher = (function () {
 
         this.emitter = new _.EventEmitter();
         this.children = [];
-        this.dispatchPromises_ = [];
+        this._dispatchPromises = [];
     }
 
     _createClass(Publisher, {
         eventType: {
-            get: function () {
+            get: function () /*:string*/{
                 return "event";
             }
         },
         isPublisher: {
-            get: function () {
+            get: function () /*:boolean*/{
                 return true;
             }
         },
@@ -56,7 +60,7 @@ var Publisher = (function () {
              * @returns {Boolean} true if event should be emitted
              */
 
-            value: function shouldEmit() {
+            value: function shouldEmit() /*:boolean*/{
                 return true;
             }
         },
@@ -70,12 +74,13 @@ var Publisher = (function () {
              * @returns {Function} Callback that unsubscribes the registered event handler
              */
 
-            value: function listen(callback, bindContext) {
-                var self = this;
+            value: function listen(callback, /*:Function*/bindContext) /*:?Function*/{
+                var _this = this;
+
                 var aborted = false;
                 bindContext = bindContext || this;
 
-                var eventHandler = function eventHandler(args) {
+                var eventHandler = function (args) {
                     if (aborted) {
                         // This state is achieved when one listener removes another.
                         //   It might be considered a bug of EventEmitter2 which makes
@@ -89,13 +94,15 @@ var Publisher = (function () {
                     if (_.isPromise(result)) {
                         // Note: To support mixins, we need to access the method this way.
                         //   Overrides are not possible.
-                        var canHandlePromise = Publisher.prototype.canHandlePromise.call(self);
+                        //
+                        //  TODO: check if we still need this with classes/do we allow override ?
+                        var canHandlePromise /*:boolean*/ = Publisher.prototype.canHandlePromise.call(_this);
                         if (!canHandlePromise) {
-                            console.warn("Unhandled promise for " + self.eventType);
+                            console.warn("Unhandled promise for " + _this.eventType);
                             return;
                         }
 
-                        self.dispatchPromises_.push({
+                        _this._dispatchPromises.push({
                             promise: result,
                             listener: callback
                         });
@@ -105,15 +112,17 @@ var Publisher = (function () {
 
                 return function () {
                     aborted = true;
-                    self.emitter.removeListener(self.eventType, eventHandler);
+                    _this.emitter.removeListener(_this.eventType, eventHandler);
                 };
             }
         },
         listenOnce: {
-            value: function listenOnce(callback, bindContext) {
+            value: function listenOnce(callback, /*:Function*/bindContext) /*:Function*/{
+                var _arguments = arguments;
+
                 bindContext = bindContext || this;
                 var unsubscribe = this.listen(function () {
-                    var args = Array.prototype.slice.call(arguments);
+                    var args = Array.prototype.slice.call(_arguments);
                     unsubscribe();
                     return callback.apply(bindContext, args);
                 });
@@ -142,7 +151,7 @@ var Publisher = (function () {
             })(function (promise) {
                 var _this = this;
 
-                var canHandlePromise = this.children.indexOf("completed") >= 0 && this.children.indexOf("failed") >= 0;
+                var canHandlePromise /*:boolean*/ = this.children.indexOf("completed") >= 0 && this.children.indexOf("failed") >= 0;
 
                 if (!canHandlePromise) {
                     throw new Error("Publisher must have \"completed\" and \"failed\" child publishers");
@@ -163,7 +172,7 @@ var Publisher = (function () {
             value: function fetchJson(promise) {
                 var _this = this;
 
-                var canHandlePromise = this.children.indexOf("completed") >= 0 && this.children.indexOf("failed") >= 0;
+                var canHandlePromise /*:boolean*/ = this.children.indexOf("completed") >= 0 && this.children.indexOf("failed") >= 0;
 
                 if (!canHandlePromise) {
                     throw new Error("Publisher must have \"completed\" and \"failed\" child publishers");
@@ -186,9 +195,11 @@ var Publisher = (function () {
              */
 
             value: function resolve(promise) {
+                var _this = this;
+
                 // Note: To support mixins, we need to access the method this way.
                 //   Overrides are not possible.
-                var canHandlePromise = Publisher.prototype.canHandlePromise.call(this);
+                var canHandlePromise /*:boolean*/ = Publisher.prototype.canHandlePromise.call(this);
                 if (!canHandlePromise) {
                     throw new Error("Not an async publisher");
                 }
@@ -198,11 +209,10 @@ var Publisher = (function () {
                     return;
                 }
 
-                var self = this;
                 promise.then(function (response) {
-                    return self.completed.trigger(response);
+                    return _this.completed.trigger(response);
                 }, function (error) {
-                    return self.failed.trigger(error);
+                    return _this.failed.trigger(error);
                 });
             }
         },
@@ -220,7 +230,7 @@ var Publisher = (function () {
             value: function then(onSuccess, onFailure) {
                 // Note: To support mixins, we need to access the method this way.
                 //   Overrides are not possible.
-                var canHandlePromise = Publisher.prototype.canHandlePromise.call(this);
+                var canHandlePromise /*:boolean*/ = Publisher.prototype.canHandlePromise.call(this);
                 if (!canHandlePromise) {
                     throw new Error("Not an async publisher");
                 }
@@ -239,7 +249,7 @@ var Publisher = (function () {
             }
         },
         canHandlePromise: {
-            value: function canHandlePromise() {
+            value: function canHandlePromise() /*:boolean*/{
                 return this.completed && this.failed && this.completed.isPublisher && this.failed.isPublisher;
             }
         },
@@ -257,7 +267,7 @@ var Publisher = (function () {
                 }
 
                 if (this.shouldEmit.apply(this, args)) {
-                    this.dispatchPromises_ = [];
+                    this._dispatchPromises = [];
                     this.emitter.emit(this.eventType, args);
                     // Note: To support mixins, we need to access the method this way.
                     //   Overrides are not possible.
@@ -272,11 +282,11 @@ var Publisher = (function () {
              */
 
             value: function trigger() {
-                var args = arguments;
-                var self = this;
+                var _this = this;
 
+                var args = arguments;
                 _.nextTick(function () {
-                    self.triggerSync.apply(self, args);
+                    return _this.triggerSync.apply(_this, args);
                 });
             }
         },
@@ -310,16 +320,21 @@ var Publisher = (function () {
                         reject(args);
                     });
 
-                    self.trigger.apply(self, args);
+                    self.trigger.apply(this, args);
                 });
 
                 return promise;
             }
         },
         _handleDispatchPromises: {
+
+            /**
+             * @private
+             */
+
             value: function _handleDispatchPromises() {
-                var promises = this.dispatchPromises_;
-                this.dispatchPromises_ = [];
+                var promises = this._dispatchPromises;
+                this._dispatchPromises = [];
 
                 if (promises.length === 0) {
                     return;

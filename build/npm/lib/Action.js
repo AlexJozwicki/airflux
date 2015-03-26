@@ -15,6 +15,11 @@ var Publisher = require("./Publisher");
  */
 
 var Action = (function (_Publisher) {
+    /*:: asyncResult    : boolean; */
+    /*:: children       : Array< any >; */
+    /*:: preEmit        : Function;*/
+    /*:: shouldEmit     : Function ;*/
+
     function Action() {
         var definition = arguments[0] === undefined ? {} : arguments[0];
 
@@ -49,12 +54,12 @@ var Action = (function (_Publisher) {
 
     _createClass(Action, {
         eventType: {
-            get: function () {
+            get: function () /*:string*/{
                 return "event";
             }
         },
         isAction: {
-            get: function () {
+            get: function () /*:boolean*/{
                 return true;
             }
         },

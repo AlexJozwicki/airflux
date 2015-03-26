@@ -12,65 +12,27 @@ var _classCallCheck = function (instance, Constructor) { if (!(instance instance
 
 var Store = require("./Store");
 
-var JoinStrictStore = (function (_Store) {
-    function JoinStrictStore() {
-        _classCallCheck(this, JoinStrictStore);
+function joinClassFactory(join) {
+    return (function (_Store) {
+        var _class = function () {
+            _classCallCheck(this, _class);
 
-        _get(Object.getPrototypeOf(JoinStrictStore.prototype), "constructor", this).call(this);
+            _get(Object.getPrototypeOf(_class.prototype), "constructor", this).call(this);
 
-        var listenables = [].concat(_slice.call(arguments), ["trigger"]);
-        this.joinStrict.apply(this, listenables);
-    }
+            var listenables = [].concat(_slice.call(arguments), ["trigger"]);
+            this[join].apply(this, listenables);
+        };
 
-    _inherits(JoinStrictStore, _Store);
+        _inherits(_class, _Store);
 
-    return JoinStrictStore;
-})(Store);
+        return _class;
+    })(Store);
+}
 
-var JoinLeadingStore = (function (_Store2) {
-    function JoinLeadingStore() {
-        _classCallCheck(this, JoinLeadingStore);
-
-        _get(Object.getPrototypeOf(JoinLeadingStore.prototype), "constructor", this).call(this);
-
-        var listenables = [].concat(_slice.call(arguments), ["trigger"]);
-        this.joinLeading.apply(this, listenables);
-    }
-
-    _inherits(JoinLeadingStore, _Store2);
-
-    return JoinLeadingStore;
-})(Store);
-
-var JoinTrailingStore = (function (_Store3) {
-    function JoinTrailingStore() {
-        _classCallCheck(this, JoinTrailingStore);
-
-        _get(Object.getPrototypeOf(JoinTrailingStore.prototype), "constructor", this).call(this);
-
-        var listenables = [].concat(_slice.call(arguments), ["trigger"]);
-        this.joinTrailing.apply(this, listenables);
-    }
-
-    _inherits(JoinTrailingStore, _Store3);
-
-    return JoinTrailingStore;
-})(Store);
-
-var JoinConcatStore = (function (_Store4) {
-    function JoinConcatStore() {
-        _classCallCheck(this, JoinConcatStore);
-
-        _get(Object.getPrototypeOf(JoinConcatStore.prototype), "constructor", this).call(this);
-
-        var listenables = [].concat(_slice.call(arguments), ["trigger"]);
-        this.joinConcat.apply(this, listenables);
-    }
-
-    _inherits(JoinConcatStore, _Store4);
-
-    return JoinConcatStore;
-})(Store);
+var JoinStrictStore = joinClassFactory("joinStrict");
+var JoinLeadingStore = joinClassFactory("joinLeading");
+var JoinTrailingStore = joinClassFactory("joinTrailing");
+var JoinConcatStore = joinClassFactory("joinConcat");
 
 module.exports = {
     JoinStrict: function JoinStrict() {

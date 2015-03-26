@@ -7,6 +7,7 @@ exports.Action = require("./Action");
 exports.Listener = require("./Listener");
 exports.Publisher = require("./Publisher");
 exports.Store = require("./Store");
+exports.FluxComponent = require("./FluxComponent");
 
 exports.joinTrailing = exports.all = JoinStores.JoinTrailing;
 exports.joinLeading = JoinStores.JoinLeading;
