@@ -201,12 +201,12 @@ class Publisher {
      */
     triggerSync() {
         var args = arguments;
-        var preResult = this.preEmit( ...args );
+        var preResult = this.preEmit.apply( this, args );
         if( typeof preResult !== 'undefined' ) {
             args = _.isArguments(preResult) ? preResult : [].concat(preResult);
         }
 
-        if( this.shouldEmit( ...args ) ) {
+        if( this.shouldEmit.apply( this, args ) ) {
             this._dispatchPromises = [];
             this.emitter.emit(this.eventType, args);
             // Note: To support mixins, we need to access the method this way.
@@ -220,7 +220,7 @@ class Publisher {
      */
     trigger() {
         var args = arguments;
-        _.nextTick( () => this.triggerSync( ...args ) );
+        _.nextTick( () => this.triggerSync.apply( this, args ) );
     }
 
     /**
@@ -250,13 +250,15 @@ class Publisher {
                 reject(args);
             });
 
-            self.trigger( ...args );
+            self.trigger.apply( this, args );
         });
 
         return promise;
     }
 
-
+    /**
+     * @private
+     */
     _handleDispatchPromises() {
         var promises = this._dispatchPromises;
         this._dispatchPromises = [];
