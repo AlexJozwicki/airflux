@@ -1,41 +1,22 @@
 var Store = require("./Store");
 
 
-class JoinStrictStore extends Store {
-    constructor() {
-        super();
+function joinClassFactory( join ) {
+    return class extends Store {
+        constructor() {
+            super();
 
-        var listenables = [ ...arguments, 'trigger' ];
-        this.joinStrict( ...listenables );
-    }
+            var listenables = [ ...arguments, 'trigger' ];
+            this[join]( ...listenables );
+        }
+    };
 }
 
-class JoinLeadingStore extends Store {
-    constructor() {
-        super();
 
-        var listenables = [ ...arguments, 'trigger' ];
-        this.joinLeading( ...listenables );
-    }
-}
-
-class JoinTrailingStore extends Store {
-    constructor() {
-        super();
-
-        var listenables = [ ...arguments, 'trigger' ];
-        this.joinTrailing( ...listenables );
-    }
-}
-
-class JoinConcatStore extends Store {
-    constructor() {
-        super();
-
-        var listenables = [ ...arguments, 'trigger' ];
-        this.joinConcat( ...listenables );
-    }
-}
+var JoinStrictStore     = joinClassFactory( 'joinStrict' );
+var JoinLeadingStore    = joinClassFactory( 'joinLeading' );
+var JoinTrailingStore   = joinClassFactory( 'joinTrailing' );
+var JoinConcatStore     = joinClassFactory( 'joinConcat' );
 
 
 module.exports = {

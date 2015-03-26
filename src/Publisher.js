@@ -5,6 +5,11 @@ var _ = require('./utils');
  * @constructor
  */
 class Publisher {
+    /*:: emitter            : any;*/
+    /*:: children           : Array< any >;*/
+    /*:: _dispatchPromises  : Array< any >;*/
+
+
     /**
      * @protected
      */
@@ -45,7 +50,7 @@ class Publisher {
      * @param {Mixed} [optional] bindContext The context to bind the callback with
      * @returns {Function} Callback that unsubscribes the registered event handler
      */
-    listen( callback, bindContext )/*:Function|void*/ {
+    listen( callback/*:Function*/, bindContext )/*:?Function*/ {
         var aborted = false;
         bindContext = bindContext || this;
 
@@ -86,7 +91,7 @@ class Publisher {
     }
 
 
-    listenOnce( callback, bindContext ) {
+    listenOnce( callback/*:Function*/, bindContext )/*:Function*/ {
         bindContext = bindContext || this;
         var unsubscribe = this.listen( () => {
             var args = Array.prototype.slice.call(arguments);
@@ -182,7 +187,7 @@ class Publisher {
     }
 
 
-    catch(onFailure) {
+    catch( onFailure ) {
         this.then(null, onFailure);
     }
 

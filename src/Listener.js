@@ -1,8 +1,9 @@
 var _ = require('./utils');
-
 var Publisher = require('./Publisher');
-
 var instanceJoinCreator = require('./instanceJoinCreator');
+
+
+/*:: type SubscriptionObj = { stop: Function; listenable: Action|Store }; */
 
 
 /**
@@ -11,6 +12,8 @@ var instanceJoinCreator = require('./instanceJoinCreator');
  * @extends {Publisher}
  */
 class Listener extends Publisher {
+    /*:: subscriptions: Array< SubscriptionObj >;*/
+
     constructor() {
         super();
         this.subscriptions = [];
@@ -23,7 +26,7 @@ class Listener extends Publisher {
      * @param {Action|Store} listenable The listenable we want to search for
      * @returns {Boolean} The result of a recursive search among `this.subscriptions`
      */
-    hasListener(listenable)  {
+    hasListener( listenable/*:Action|Store*/ )  {
         var subs = this.subscriptions || [];
         for (var i = 0; i < subs.length; ++i) {
             var listenables = [].concat(subs[i].listenable);
@@ -46,7 +49,7 @@ class Listener extends Publisher {
      *
      * @param {Object} listenables An object of listenables. Keys will be used as callback method names.
      */
-    listenToMany(listenables) {
+    listenToMany( listenables/*:Action|Store*/ ) {
         var allListenables = flattenListenables(listenables);
         for (var key in allListenables) {
             var cbname = _.callbackName(key);
@@ -69,7 +72,7 @@ class Listener extends Publisher {
      *  listened to.
      * @returns {String|Undefined} An error message, or undefined if there was no problem.
      */
-    validateListening(listenable) {
+    validateListening( listenable/*:Action|Store*/ ) {
         if (listenable === this) {
             return 'Listener is not able to listen to itself';
         }
@@ -90,7 +93,7 @@ class Listener extends Publisher {
      * @param {Function|String} defaultCallback The callback to register as default handler
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
-    listenTo(listenable, callback, defaultCallback)  {
+    listenTo( listenable/*:Action|Store*/, callback/*:Function|string*/, defaultCallback/*:Function:string*/ )/*:SubscriptionObj*/  {
         _.throwIf(this.validateListening(listenable));
 
         this.fetchInitialState(listenable, defaultCallback);
@@ -119,7 +122,7 @@ class Listener extends Publisher {
      * @param {Action|Store} listenable The action or store we no longer want to listen to
      * @returns {Boolean} True if a subscription was found and removed, otherwise false.
      */
-    stopListeningTo(listenable) {
+    stopListeningTo( listenable/*:Action|Store*/ )/*:boolean*/ {
         var subs = this.subscriptions || [];
         for (var i = 0; i < subs.length; ++i) {
             var sub = subs[i];
@@ -147,11 +150,11 @@ class Listener extends Publisher {
     }
 
     /**
-     * Used in `listenTo`. Fetches initial data from a publisher if it has a `getInitialState` method.
+     * Used in `listenTo`. Fetches initial data from a publisher if it has a `state` getter.
      * @param {Action|Store} listenable The publisher we want to get initial state from
      * @param {Function|String} defaultCallback The method to receive the data
      */
-    fetchInitialState(listenable, defaultCallback) {
+    fetchInitialState( listenable/*:Action|Store*/, defaultCallback/*:Function|string*/ ) {
         if (typeof defaultCallback === 'string') {
             defaultCallback = this[defaultCallback];
         }
@@ -213,7 +216,7 @@ Listener.prototype.joinStrict = instanceJoinCreator('strict');
  *
  * @param {Object} listenable The parent listenable
  */
-var mapChildListenables = function (listenable) {
+var mapChildListenables = function( listenable/*:Action|Store*/ ) {
     var children = {};
 
     var childListenables = listenable.children || [];
@@ -233,7 +236,7 @@ var mapChildListenables = function (listenable) {
  *
  * @param {Object} listenables The top-level listenables
  */
-var flattenListenables = function (listenables) {
+var flattenListenables = function( listenables/*:Action|Store*/ ) {
     var flattened = {};
     for (var key in listenables) {
         var listenable = listenables[key];

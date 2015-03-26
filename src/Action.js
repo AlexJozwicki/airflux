@@ -6,6 +6,11 @@ var Publisher = require( './Publisher' );
  *
  */
 class Action extends Publisher {
+    /*:: asyncResult    : boolean; */
+    /*:: children       : Array< any >; */
+    /*:: preEmit        : Function;*/
+    /*:: shouldEmit     : Function ;*/
+
     constructor( definition = {} ) {
         super();
 
@@ -32,8 +37,8 @@ class Action extends Publisher {
         return functor;
     }
 
-    get eventType() { return 'event'; }
-    get isAction() { return true; }
+    get eventType()/*:string*/ { return 'event'; }
+    get isAction()/*:boolean*/ { return true; }
 
 
     /**
