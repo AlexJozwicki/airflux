@@ -9,7 +9,7 @@ class Store extends Listener {
         super();
     }
 
-    get eventType() { return 'change'; }
+    get eventType()/*:string*/ { return 'change'; }
 
     /**
      * Publishes the state to all subscribers.

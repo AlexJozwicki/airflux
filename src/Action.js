@@ -1,7 +1,6 @@
 var Publisher = require( './Publisher' );
 
 
-
 /**
  *
  */

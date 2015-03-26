@@ -1,5 +1,5 @@
-var _ = require('./utils');
-var Publisher = require('./Publisher');
+var _           = require('./utils');
+var Publisher   = require('./Publisher');
 var instanceJoinCreator = require('./instanceJoinCreator');
 
 
