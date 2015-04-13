@@ -71,9 +71,9 @@ describe('using joins',function(){
                 spy;
 
             beforeEach(function() {
-                action1 = new airflux.SimpleAction();
-                action2 = new airflux.SimpleAction();
-                action3 = new airflux.SimpleAction();
+                action1 = new airflux.SimpleAction( true );
+                action2 = new airflux.SimpleAction( true );
+                action3 = new airflux.SimpleAction( true );
                 join = airflux.joinStrict(action1,action2,action3);
                 spy = sinon.spy();
 
@@ -81,9 +81,9 @@ describe('using joins',function(){
             });
 
             it("should emit with the arguments",function(done){
-                action1.triggerSync('a');
-                action2.triggerSync('b');
-                action3.triggerSync('c');
+                action1('a');
+                action2('b');
+                action3('c');
 
                 setTimeout(function() {
                     assert.equal(spy.callCount,1);
@@ -93,9 +93,9 @@ describe('using joins',function(){
             });
 
             it("should throw error if triggered more than once",function(){
-                action1.triggerSync('a'); // sync trigger to make sure error is correctly caught
+                action1('a'); // sync trigger to make sure error is correctly caught
                 assert.throws(function(){
-                    action1.triggerSync('x');
+                    action1('x');
                 });
             });
         });
@@ -200,18 +200,18 @@ describe('using joins',function(){
                 spy;
 
             beforeEach(function () {
-                action1 = new airflux.SimpleAction();
-                action2 = new airflux.SimpleAction();
-                action3 = new airflux.SimpleAction();
+                action1 = new airflux.SimpleAction( true );
+                action2 = new airflux.SimpleAction( true );
+                action3 = new airflux.SimpleAction( true );
                 store = new airflux.Store();
                 spy = sinon.spy();
                 store.joinStrict(action1,action2,action3,spy);
             });
 
             it("should emit with the arguments",function(done){
-                action1.triggerSync('a');
-                action2.triggerSync('b');
-                action3.triggerSync('c');
+                action1('a');
+                action2('b');
+                action3('c');
 
                 setTimeout(function() {
                     assert.equal(spy.callCount,1);
@@ -220,7 +220,7 @@ describe('using joins',function(){
                 }, 10);
             });
             it("should throw error if triggered more than once",function(){
-                action1.triggerSync('a'); // sync trigger to be able to test
+                action1('a'); // sync trigger to be able to test
                 assert.throws(function(){
                     action1.triggerSync('x');
                 });

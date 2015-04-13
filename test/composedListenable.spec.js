@@ -121,7 +121,7 @@ describe('Composed listenable with stores', function() {
         all;
 
     beforeEach(function () {
-        action = new airflux.SimpleAction();
+        action = new airflux.Action();
         store1 = new class extends airflux.Store {
             constructor() {
                 super();
@@ -144,7 +144,7 @@ describe('Composed listenable with stores', function() {
             });
         });
 
-        action('a');
+        action.asFunction('a');
 
         return assert.eventually.deepEqual(promise, [['a'], ['a']]);
     });
@@ -169,7 +169,7 @@ describe('Composed listenable with stores', function() {
                 });
             });
 
-            action('a');
+            action.asFunction('a');
 
             return assert.eventually.deepEqual(promise, [['a'], ['a']]);
         });

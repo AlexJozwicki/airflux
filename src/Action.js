@@ -38,14 +38,8 @@ class Action extends Publisher {
         var functor = trigger.bind( this );
 
         Object.defineProperty( functor, 'action', { value: this } );
-        Object.defineProperty( functor, 'listen', { value: ( fn ) => {
-            return Action.prototype.listen.call( this, fn );
-        } } );
-        Object.defineProperty( functor, 'trigger', { value: ( fn ) => {
-            return Action.prototype.trigger.call( this, fn );
-        } } );
-        Object.defineProperty( functor, 'triggerSync', { value: ( fn ) => {
-            return Action.prototype.triggerSync.call( this, fn );
+        Object.defineProperty( functor, 'listen', { value: ( fn, bindCtx ) => {
+            return Action.prototype.listen.call( this, fn, bindCtx );
         } } );
 
 
