@@ -39,13 +39,16 @@ class FluxComponent extends React.Component {
         var thisComponent = this;
         for( var key in this.listenables ) {
             let listenable = this.listenables[key];
-            if( typeof this[key] === 'function' ) {
+            let callback = this[ key ];
+
+            if( typeof callback === 'function' ) {
                 this._listener.listenTo( listenable, function() {
-                    thisComponent[key]( ...arguments )
+                    callback.apply( thisComponent, arguments )
                 } );
             }
-            else
+            else {
                 this._listener.listenTo( listenable, ( value ) => this.setState( { [key]: value } ) );
+            }
         }
     }
 
