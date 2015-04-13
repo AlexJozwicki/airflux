@@ -6,8 +6,6 @@ var Publisher = require( './Publisher' );
  *
  */
 class Action extends Publisher {
-    /*:: asyncResult    : boolean; */
-    /*:: children       : Array< any >; */
     /*:: preEmit        : Function;*/
     /*:: shouldEmit     : Function ;*/
 
