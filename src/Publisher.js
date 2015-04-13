@@ -121,23 +121,6 @@ class Publisher {
     }
 
     /**
-     */
-    fetchJson( promise ) {
-        var canHandlePromise/*:boolean*/ =
-            this.children.indexOf('completed') >= 0 &&
-            this.children.indexOf('failed') >= 0;
-
-        if (!canHandlePromise){
-            throw new Error('Publisher must have "completed" and "failed" child publishers');
-        }
-
-        promise.then( ( response ) => response.json() )
-               .then( this.completed )
-               .catch( ( error ) => this.failed( error ) );
-    }
-
-
-    /**
      * Attach handlers to promise that trigger the completed and failed
      * child publishers, if available.
      *

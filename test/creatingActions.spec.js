@@ -6,41 +6,25 @@ var sinon   = require('sinon');
 chai.use(require('chai-as-promised'));
 
 describe('Creating action', function() {
-    it("should copy preEmit and shouldEmit from the definition into the action",function(){
-        var def = {
-            preEmit: function () { return "PRE"; },
-            shouldEmit: function () { return "SHO"; },
-        };
-        var action = new airflux.Action(def);
-        assert.equal(action.preEmit, def.preEmit);
-        assert.equal(action.shouldEmit, def.shouldEmit);
-    });
-
     it("should create specified child actions",function(){
-        var def = {children: ["foo","BAR"]},
-            action = new airflux.Action(def);
+        var action = new airflux.Action().withChildren( ["foo","BAR"] );
 
-        assert.deepEqual(action.children, ["foo", "BAR"]);
-        assert.equal(action.foo.isAction, true);
-        assert.deepEqual(action.foo.children, []);
-        assert.equal(action.BAR.isAction, true);
+        assert.instanceOf( action.foo, airflux.Action );
+        assert.instanceOf( action.BAR, airflux.Action );
     });
 
     it("should create completed and failed child actions for async actions",function(){
-        var def = {asyncResult: true},
-            action = new airflux.Action(def);
+        var action = new airflux.Action().asyncResult();
 
-        assert.equal(action.asyncResult, true);
-        assert.deepEqual(action.children, ["completed", "failed"]);
-        assert.equal(action.completed.isAction, true);
-        assert.equal(action.failed.isAction, true);
+        assert.instanceOf( action.completed, airflux.Action);
+        assert.instanceOf( action.failed, airflux.Action );
     });
 
     var action,
         testArgs;
 
     beforeEach(function () {
-        action = new airflux.Action();
+        action = new airflux.SimpleAction();
         testArgs = [1337, 'test'];
     });
 
@@ -50,8 +34,8 @@ describe('Creating action', function() {
 
 
     describe("the synchronisity",function(){
-        var syncaction = new airflux.Action({sync: true}),
-            asyncaction = new airflux.Action(),
+        var syncaction = new airflux.SimpleAction( true ),
+            asyncaction = new airflux.SimpleAction(),
             synccalled = false,
             asynccalled = false,
             store = new class extends airflux.Store {
@@ -93,26 +77,28 @@ describe('Creating action', function() {
 
 
         describe('when adding preEmit hook', function() {
-            var preEmit = sinon.spy(),
-                action = new airflux.Action({preEmit:preEmit});
+            var action = new airflux.Action();
+            action.preEmit = sinon.spy();
 
-            action(1337,'test');
+            action.asFunction(1337,'test');
 
             it('should receive arguments from action functor', function() {
-                assert.deepEqual(preEmit.firstCall.args,[1337,'test']);
+                assert.deepEqual( action.preEmit.firstCall.args,[1337,'test'] );
             });
         });
 
         describe('when adding shouldEmit hook',function(){
             describe("when hook returns true",function(){
                 var shouldEmit = sinon.stub().returns(true),
-                    action = new airflux.Action({shouldEmit:shouldEmit}),
+                    action = new airflux.Action(),
                     callback = sinon.spy();
+
+                action.shouldEmit = shouldEmit;
 
                 var listener = new airflux.Listener();
                 listener.listenTo(action,callback);
 
-                action(1337,'test');
+                action.asFunction(1337,'test');
 
                 it('should receive arguments from action functor', function() {
                     assert.deepEqual(shouldEmit.firstCall.args,[1337,'test']);
@@ -127,13 +113,13 @@ describe('Creating action', function() {
 
             describe("when hook returns false",function(){
                 var shouldEmit = sinon.stub().returns(false),
-                    action = new airflux.Action({shouldEmit:shouldEmit}),
+                    action = new airflux.Action(),
                     callback = sinon.spy();
+                action.shouldEmit = shouldEmit;
 
                 var listener = new airflux.Listener();
                 listener.listenTo(action,callback);
-
-                action(1337,'test');
+                action.asFunction(1337,'test');
 
                 it('should receive arguments from action functor', function() {
                     assert.deepEqual(shouldEmit.firstCall.args,[1337,'test']);
@@ -153,8 +139,8 @@ describe('Creating actions with children to an action definition object', functi
 
     beforeEach(function () {
         actions = {
-            foo: new airflux.Action({asyncResult: true}),
-            bar: new airflux.Action({children: ['baz']})
+            foo: new airflux.Action().asyncResult(),
+            bar: new airflux.Action().withChildren( ['baz'] )
         };
     });
 
@@ -184,7 +170,7 @@ describe('Creating actions with children to an action definition object', functi
 
         it('should receive the correct arguments', function() {
             var testArgs = [1337, 'test'];
-            actions.bar.baz(testArgs[0], testArgs[1]);
+            actions.bar.baz.asFunction(testArgs[0], testArgs[1]);
 
             return assert.eventually.deepEqual(promise, testArgs);
         });
@@ -217,7 +203,7 @@ describe('Creating actions with children to an action definition object', functi
 
         it('should invoke the completed action with the correct arguments', function() {
             var testArgs = [1337, 'test'];
-            actions.foo(testArgs[0], testArgs[1]);
+            actions.foo.asFunction(testArgs[0], testArgs[1]);
 
             return assert.eventually.deepEqual(promise, testArgs);
         });
@@ -230,19 +216,19 @@ describe('Creating multiple actions to an action definition object', function() 
 
     beforeEach(function () {
         actions = {
-            foo: new airflux.Action(),
-            bar: new airflux.Action()
+            foo: new airflux.SimpleAction(),
+            bar: new airflux.SimpleAction()
         };
     });
 
-    it('should contain foo and bar properties', function() {
-        assert.property(actions, 'foo');
-        assert.property(actions, 'bar');
+    it('should contain action functor on foo and bar properties', function() {
+        assert.isFunction(actions.foo);
+        assert.isFunction(actions.bar);
     });
 
-    it('should contain action functor on foo and bar properties', function() {
-        assert.instanceOf(actions.foo, airflux.Action);
-        assert.instanceOf(actions.bar, airflux.Action);
+    it('functors shoudl have the original action as property', function() {
+        assert.instanceOf(actions.foo.action, airflux.Action);
+        assert.instanceOf(actions.bar.action, airflux.Action);
     });
 
     describe('when listening to any of the actions created this way', function() {
@@ -252,7 +238,7 @@ describe('Creating multiple actions to an action definition object', function() 
         beforeEach(function() {
             promise = new Promise(function(resolve) {
                 actions.foo.listen(function() {
-                    assert.equal(this, actions.foo);
+                    assert.equal(this, actions.foo.action);
                     resolve(Array.prototype.slice.call(arguments, 0));
                 }); // not passing context, should default to action
             });

@@ -1,6 +1,7 @@
 var Publisher = require( './Publisher' );
 
 
+
 /**
  *
  */
@@ -10,42 +11,49 @@ class Action extends Publisher {
     /*:: preEmit        : Function;*/
     /*:: shouldEmit     : Function ;*/
 
-    constructor( definition = {} ) {
+    constructor( sync/*:boolean*/ = false ) {
         super();
 
-        this.asyncResult = !!definition.asyncResult;
+        Object.defineProperty( this, 'sync', { value: sync } );
+    }
 
-        this.children = definition.children || [];
-        if (this.asyncResult) {
-            this.children.push('completed', 'failed');
+    asyncResult( listenFunction = void 0 ) {
+        Object.defineProperty( this, 'completed', { value: new Action() } );
+        Object.defineProperty( this, 'failed', { value: new Action() } );
+
+        if( listenFunction ) {
+            this.listen( listenFunction );
         }
 
-        if( definition.preEmit ) {
-            this.preEmit = definition.preEmit;
-        }
-        if( definition.shouldEmit ) {
-            this.shouldEmit = definition.shouldEmit;
-        }
+        return this;
+    }
 
-        this.createChildActions();
+    withChildren( children ) {
+        children.forEach( ( childName ) => Object.defineProperty( this, childName, { value: new Action() } ) );
+        return this;
+    }
 
-        var trigger = definition.sync ? this.triggerSync : this.trigger;
-        var functor = trigger.bind(this);
-        functor.__proto__ = this;
+    get asFunction() {
+        var trigger = this.sync ? this.triggerSync : this.trigger;
+        var functor = trigger.bind( this );
+
+        Object.defineProperty( functor, 'action', { value: this } );
+        Object.defineProperty( functor, 'listen', { value: ( fn ) => {
+            return Action.prototype.listen.call( this, fn );
+        } } );
+        Object.defineProperty( functor, 'trigger', { value: ( fn ) => {
+            return Action.prototype.trigger.call( this, fn );
+        } } );
+        Object.defineProperty( functor, 'triggerSync', { value: ( fn ) => {
+            return Action.prototype.triggerSync.call( this, fn );
+        } } );
+
 
         return functor;
     }
 
-    get eventType()/*:string*/ { return 'event'; }
-    get isAction()/*:boolean*/ { return true; }
-
-
-    /**
-     * @protected
-     */
-    createChildActions() {
-        this.children.forEach( ( childName ) => this[childName] = new Action({ actionType: childName }) );
-    }
+    get eventType() /*:string*/ { return 'event'; }
+    get isAction()  /*:boolean*/ { return true; }
 }
 
 

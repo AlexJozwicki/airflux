@@ -11,9 +11,9 @@ describe('Composed listenables', function() {
         all;
 
     beforeEach(function() {
-        action1 = new airflux.Action();
-        action2 = new airflux.Action();
-        action3 = new airflux.Action();
+        action1 = new airflux.SimpleAction();
+        action2 = new airflux.SimpleAction();
+        action3 = new airflux.SimpleAction();
         all = airflux.all(action1, action2, action3);
     });
 
@@ -121,7 +121,7 @@ describe('Composed listenable with stores', function() {
         all;
 
     beforeEach(function () {
-        action = new airflux.Action();
+        action = new airflux.SimpleAction();
         store1 = new class extends airflux.Store {
             constructor() {
                 super();

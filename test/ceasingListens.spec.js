@@ -1,6 +1,6 @@
 var assert = require('chai').assert,
     airflux = require('../src'),
-    Action = airflux.Action,
+    Action = airflux.SimpleAction,
     Store = airflux.Store,
     fn = function(){},
     sinon = require('sinon');

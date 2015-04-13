@@ -5,9 +5,9 @@ var sinon   = require('sinon');
 describe('using joins',function(){
     describe('with static methods',function(){
         describe('keeping trailing arguments',function(){
-            var action1 = new airflux.Action(),
-                action2 = new airflux.Action(),
-                action3 = new airflux.Action(),
+            var action1 = new airflux.SimpleAction(),
+                action2 = new airflux.SimpleAction(),
+                action3 = new airflux.SimpleAction(),
                 join = airflux.joinTrailing(action1,action2,action3),
                 spy = sinon.spy();
             new airflux.Store().listenTo(join,spy);
@@ -32,9 +32,9 @@ describe('using joins',function(){
             });
         });
         describe('keeping leading arguments',function(){
-            var action1 = new airflux.Action(),
-                action2 = new airflux.Action(),
-                action3 = new airflux.Action(),
+            var action1 = new airflux.SimpleAction(),
+                action2 = new airflux.SimpleAction(),
+                action3 = new airflux.SimpleAction(),
                 join = airflux.joinLeading(action1,action2,action3),
                 spy = sinon.spy();
             new airflux.Store().listenTo(join,spy);
@@ -48,9 +48,9 @@ describe('using joins',function(){
             });
         });
         describe('concatenating arguments',function(){
-            var action1 = new airflux.Action(),
-                action2 = new airflux.Action(),
-                action3 = new airflux.Action(),
+            var action1 = new airflux.SimpleAction(),
+                action2 = new airflux.SimpleAction(),
+                action3 = new airflux.SimpleAction(),
                 join = airflux.joinConcat(action1,action2,action3),
                 spy = sinon.spy();
             new airflux.Store().listenTo(join,spy);
@@ -71,9 +71,9 @@ describe('using joins',function(){
                 spy;
 
             beforeEach(function() {
-                action1 = new airflux.Action();
-                action2 = new airflux.Action();
-                action3 = new airflux.Action();
+                action1 = new airflux.SimpleAction();
+                action2 = new airflux.SimpleAction();
+                action3 = new airflux.SimpleAction();
                 join = airflux.joinStrict(action1,action2,action3);
                 spy = sinon.spy();
 
@@ -117,9 +117,9 @@ describe('using joins',function(){
             });
         });
         describe('keeping trailing arguments',function(){
-            var action1 = new airflux.Action(),
-                action2 = new airflux.Action(),
-                action3 = new airflux.Action(),
+            var action1 = new airflux.SimpleAction(),
+                action2 = new airflux.SimpleAction(),
+                action3 = new airflux.SimpleAction(),
                 store = new airflux.Store(),
                 callback = sinon.spy(),
                 validate = sinon.spy(),
@@ -161,9 +161,9 @@ describe('using joins',function(){
             });
         });
         describe('keeping leading arguments',function(){
-            var action1 = new airflux.Action(),
-                action2 = new airflux.Action(),
-                action3 = new airflux.Action(),
+            var action1 = new airflux.SimpleAction(),
+                action2 = new airflux.SimpleAction(),
+                action3 = new airflux.SimpleAction(),
                 store = new airflux.Store(),
                 spy = sinon.spy();
             store.joinLeading(action1,action2,action3,spy);
@@ -177,9 +177,9 @@ describe('using joins',function(){
             });
         });
         describe('concatenating arguments',function(){
-            var action1 = new airflux.Action(),
-                action2 = new airflux.Action(),
-                action3 = new airflux.Action(),
+            var action1 = new airflux.SimpleAction(),
+                action2 = new airflux.SimpleAction(),
+                action3 = new airflux.SimpleAction(),
                 store = new airflux.Store(),
                 spy = sinon.spy();
             store.joinConcat(action1,action2,action3,spy);
@@ -200,9 +200,9 @@ describe('using joins',function(){
                 spy;
 
             beforeEach(function () {
-                action1 = new airflux.Action();
-                action2 = new airflux.Action();
-                action3 = new airflux.Action();
+                action1 = new airflux.SimpleAction();
+                action2 = new airflux.SimpleAction();
+                action3 = new airflux.SimpleAction();
                 store = new airflux.Store();
                 spy = sinon.spy();
                 store.joinStrict(action1,action2,action3,spy);

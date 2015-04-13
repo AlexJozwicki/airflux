@@ -17,7 +17,7 @@ describe('Creating stores', function() {
             airflux.StoreMethods = {};
 
             promise = new Promise(function(resolve) {
-                action = new airflux.Action();
+                action = new airflux.SimpleAction();
                 class AnonStore extends airflux.Store {
                     constructor() {
                         super();
@@ -141,7 +141,7 @@ describe('Creating stores', function() {
             baseStore;
 
         beforeEach(function () {
-            action = new airflux.Action();
+            action = new airflux.SimpleAction();
             baseStore = class extends airflux.Store {
                 constructor() {
                     super();

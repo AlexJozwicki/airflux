@@ -16,7 +16,7 @@ describe('Creating aggregate stores', function() {
 
         beforeEach(function() {
             promise = new Promise(function(resolve) {
-                action = new airflux.Action();
+                action = new airflux.SimpleAction();
                 store = new class extends airflux.Store {
                     constructor() {
                         super();
