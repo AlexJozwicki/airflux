@@ -27,6 +27,7 @@ describe('Stopping',function(){
         store.listenTo(action2,indivcallback);
         subobj = store.joinLeading(action1,action2,action3,joincallback);
         subobj.stop();
+
         action1("A");
         action2("B");
         action3("C");

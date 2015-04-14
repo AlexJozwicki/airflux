@@ -164,27 +164,6 @@ var Publisher = (function () {
                 });
             })
         },
-        fetchJson: {
-
-            /**
-             */
-
-            value: function fetchJson(promise) {
-                var _this = this;
-
-                var canHandlePromise /*:boolean*/ = this.children.indexOf("completed") >= 0 && this.children.indexOf("failed") >= 0;
-
-                if (!canHandlePromise) {
-                    throw new Error("Publisher must have \"completed\" and \"failed\" child publishers");
-                }
-
-                promise.then(function (response) {
-                    return response.json();
-                }).then(this.completed)["catch"](function (error) {
-                    return _this.failed(error);
-                });
-            }
-        },
         resolve: {
 
             /**
@@ -205,14 +184,14 @@ var Publisher = (function () {
                 }
 
                 if (!_.isPromise(promise)) {
-                    this.completed.trigger(promise);
+                    this.completed(promise);
                     return;
                 }
 
                 promise.then(function (response) {
-                    return _this.completed.trigger(response);
+                    return _this.completed(response);
                 }, function (error) {
-                    return _this.failed.trigger(error);
+                    return _this.failed(error);
                 });
             }
         },
@@ -223,7 +202,7 @@ var Publisher = (function () {
                     return;
                 }
 
-                this.failed.trigger(result);
+                this.failed(result);
             }
         },
         then: {
@@ -250,7 +229,7 @@ var Publisher = (function () {
         },
         canHandlePromise: {
             value: function canHandlePromise() /*:boolean*/{
-                return this.completed && this.failed && this.completed.isPublisher && this.failed.isPublisher;
+                return this.completed && this.failed && this.completed._isActionFunctor && this.failed._isActionFunctor;
             }
         },
         triggerSync: {

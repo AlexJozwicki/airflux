@@ -134,22 +134,22 @@ class Publisher {
             throw new Error('Not an async publisher');
         }
 
-        if (!_.isPromise(promise)) {
-            this.completed.trigger(promise);
+        if( !_.isPromise( promise ) ) {
+            this.completed( promise );
             return;
         }
 
-        promise.then( ( response ) => this.completed.trigger( response ), ( error ) => this.failed.trigger( error ) );
+        promise.then( ( response ) => this.completed( response ), ( error ) => this.failed( error ) );
     }
 
 
     reject( result ) {
-        if (_.isPromise(result)) {
+        if( _.isPromise( result ) ) {
             console.warn('Use #resolve() for promises.');
             return;
         }
 
-        this.failed.trigger(result);
+        this.failed( result );
     }
 
 
@@ -161,11 +161,11 @@ class Publisher {
             throw new Error('Not an async publisher');
         }
 
-        if (onSuccess) {
-            this.completed.listenOnce(onSuccess);
+        if( onSuccess ) {
+            this.completed.listenOnce( onSuccess );
         }
-        if (onFailure) {
-            this.failed.listenOnce(onFailure);
+        if( onFailure ) {
+            this.failed.listenOnce( onFailure );
         }
     }
 
@@ -176,7 +176,7 @@ class Publisher {
 
 
     canHandlePromise()/*:boolean*/ {
-        return this.completed && this.failed && this.completed.isPublisher && this.failed.isPublisher;
+        return this.completed && this.failed && this.completed._isActionFunctor && this.failed._isActionFunctor;
     }
 
     /**

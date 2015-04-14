@@ -15,44 +15,107 @@ var Publisher = require("./Publisher");
  */
 
 var Action = (function (_Publisher) {
-    /*:: asyncResult    : boolean; */
-    /*:: children       : Array< any >; */
     /*:: preEmit        : Function;*/
     /*:: shouldEmit     : Function ;*/
 
     function Action() {
-        var definition = arguments[0] === undefined ? {} : arguments[0];
+        var sync /*:boolean*/ = arguments[0] === undefined ? false : arguments[0];
 
         _classCallCheck(this, Action);
 
         _get(Object.getPrototypeOf(Action.prototype), "constructor", this).call(this);
 
-        this.asyncResult = !!definition.asyncResult;
-
-        this.children = definition.children || [];
-        if (this.asyncResult) {
-            this.children.push("completed", "failed");
-        }
-
-        if (definition.preEmit) {
-            this.preEmit = definition.preEmit;
-        }
-        if (definition.shouldEmit) {
-            this.shouldEmit = definition.shouldEmit;
-        }
-
-        this.createChildActions();
-
-        var trigger = definition.sync ? this.triggerSync : this.trigger;
-        var functor = trigger.bind(this);
-        functor.__proto__ = this;
-
-        return functor;
+        Object.defineProperty(this, "sync", { value: sync });
     }
 
     _inherits(Action, _Publisher);
 
     _createClass(Action, {
+        asyncResult: {
+
+            /**
+             * Transforms the action into one returning an asynchronous result.
+             * This will create two children actions:
+             * - completed
+             * - failed
+             *
+             * If the listen function returns a Promise, the Promise will be automatically mapped onto these two children actions.
+             */
+
+            value: function asyncResult() {
+                var listenFunction = arguments[0] === undefined ? void 0 : arguments[0];
+
+                Object.defineProperty(this, "completed", { value: new Action(false).asFunction });
+                Object.defineProperty(this, "failed", { value: new Action(false).asFunction });
+
+                if (typeof listenFunction === "function") {
+                    this.listen(listenFunction);
+                }
+
+                return this;
+            }
+        },
+        withChildren: {
+
+            /**
+             * Creates children actions
+             */
+
+            value: function withChildren(children) {
+                var _this = this;
+
+                children.forEach(function (childName) {
+                    return Object.defineProperty(_this, childName, { value: new Action().asFunction });
+                });
+                return this;
+            }
+        },
+        asSyncFunction: {
+
+            /**
+             * Returns a synchronous function to trigger the action
+             */
+
+            get: function () {
+                return this._createFunctor(true);
+            }
+        },
+        asFunction: {
+
+            /**
+            * Returns a function to trigger the action, async or sync depending on the action definition.
+             */
+
+            get: function () {
+                return this._createFunctor(this.sync);
+            }
+        },
+        _createFunctor: {
+
+            /**
+             * @private
+             */
+
+            value: function _createFunctor() {
+                var _this = this;
+
+                var sync = arguments[0] === undefined ? false : arguments[0];
+
+                var trigger = sync ? this.triggerSync : this.trigger;
+                var functor = trigger.bind(this);
+
+                Object.defineProperty(functor, "_isActionFunctor", { value: true });
+                Object.defineProperty(functor, "action", { value: this });
+                Object.defineProperty(functor, "listen", { value: function (fn, bindCtx) {
+                        return Action.prototype.listen.call(_this, fn, bindCtx);
+                    } });
+                Object.defineProperty(functor, "listenOnce", { value: function (fn, bindCtx) {
+                        return Action.prototype.listenOnce.call(_this, fn, bindCtx);
+                    } });
+
+                return functor;
+            }
+        },
         eventType: {
             get: function () /*:string*/{
                 return "event";
@@ -61,20 +124,6 @@ var Action = (function (_Publisher) {
         isAction: {
             get: function () /*:boolean*/{
                 return true;
-            }
-        },
-        createChildActions: {
-
-            /**
-             * @protected
-             */
-
-            value: function createChildActions() {
-                var _this = this;
-
-                this.children.forEach(function (childName) {
-                    return _this[childName] = new Action({ actionType: childName });
-                });
             }
         }
     });

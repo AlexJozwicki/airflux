@@ -1,0 +1,1 @@
+p=require(./package);p.main=lib;p.scripts=p.devDependencies=undefined;JSON.stringify(p,null,2)

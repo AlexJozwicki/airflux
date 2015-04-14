@@ -4,6 +4,7 @@ var _ = require("./utils");
 var JoinStores = require("./JoinStores");
 
 exports.Action = require("./Action");
+exports.SimpleAction = require("./SimpleAction");
 exports.Listener = require("./Listener");
 exports.Publisher = require("./Publisher");
 exports.Store = require("./Store");
