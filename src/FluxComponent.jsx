@@ -35,22 +35,23 @@ class FluxComponent extends React.Component {
     /**
      * Listen to all stores
      */
-    componentDidMount() {
-        var thisComponent = this;
-        for( var key in this.listenables ) {
-            let listenable = this.listenables[key];
-            let callback = this[ key ];
+     componentDidMount() {
+         var thisComponent = this;
+         for( var k in this.listenables ) {
+             let key = k;
+             let listenable = this.listenables[key];
+             let callback = this[ key ];
 
-            if( typeof callback === 'function' ) {
-                this._listener.listenTo( listenable, function() {
-                    callback.apply( thisComponent, arguments )
-                } );
-            }
-            else {
-                this._listener.listenTo( listenable, ( value ) => this.setState( { [key]: value } ) );
-            }
-        }
-    }
+             if( typeof callback === 'function' ) {
+                 this._listener.listenTo( listenable, function() {
+                     callback.apply( thisComponent, arguments )
+                 } );
+             }
+             else {
+                 this._listener.listenTo( listenable, ( value ) => this.setState( { [key]: value } ) );
+             }
+         }
+     }
 
 
     /**

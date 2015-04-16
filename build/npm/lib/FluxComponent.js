@@ -61,8 +61,9 @@ var FluxComponent = (function (_React$Component) {
                 var _this = this;
 
                 var thisComponent = this;
-                for (var key in this.listenables) {
+                for (var k in this.listenables) {
                     (function () {
+                        var key = k;
                         var listenable = _this.listenables[key];
                         var callback = _this[key];
 

@@ -60,8 +60,10 @@ class Action extends Publisher {
     }
 
 
+
+
     /**
-     * @private
+     *    
      */
     _createFunctor( sync = false ) {
         var trigger = sync ? this.triggerSync : this.trigger;

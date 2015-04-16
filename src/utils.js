@@ -42,7 +42,7 @@ exports.object = function(keys,vals){
     return o;
 };
 
-exports.Promise = Promise;
+exports.Promise = require('es6-promise').Promise;
 
 exports.createPromise = function(resolver) {
     return new exports.Promise(resolver);

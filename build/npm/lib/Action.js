@@ -93,7 +93,7 @@ var Action = (function (_Publisher) {
         _createFunctor: {
 
             /**
-             * @private
+             *    
              */
 
             value: function _createFunctor() {
