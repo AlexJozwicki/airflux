@@ -220,7 +220,7 @@ class Publisher {
         var self = this;
         var args = arguments;
 
-        var promise = _.createPromise(function( resolve, reject ) {
+        var promise = new Promise(function( resolve, reject ) {
             var removeSuccess = self.completed.listen( ( args ) => {
                 removeSuccess();
                 removeFailed();
@@ -262,7 +262,7 @@ class Publisher {
             });
         });
 
-        var joinedPromise = _.Promise.all(mappedPromises);
+        var joinedPromise = Promise.all(mappedPromises);
         return this.resolve(joinedPromise);
     }
 }   // class Publisher

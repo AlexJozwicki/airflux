@@ -286,7 +286,7 @@ var Publisher = (function () {
                 var self = this;
                 var args = arguments;
 
-                var promise = _.createPromise(function (resolve, reject) {
+                var promise = new Promise(function (resolve, reject) {
                     var removeSuccess = self.completed.listen(function (args) {
                         removeSuccess();
                         removeFailed();
@@ -331,7 +331,7 @@ var Publisher = (function () {
                     });
                 });
 
-                var joinedPromise = _.Promise.all(mappedPromises);
+                var joinedPromise = Promise.all(mappedPromises);
                 return this.resolve(joinedPromise);
             }
         }

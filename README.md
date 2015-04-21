@@ -102,7 +102,7 @@ For actions that represent asynchronous operations (e.g. API calls), a few separ
 ```javascript
 // this creates 'load', 'load.completed' and 'load.failed'
 var actions = {
-    load: new airflux.Action( { children: [ 'completed', 'failed'] } );
+    load: new airflux.Action().withChilden( [ 'completed', 'failed'] );
 };
 
 // when 'load' is triggered, call async operation and trigger related actions
@@ -115,17 +115,12 @@ actions.load.listen( () => {
 });
 ```
 
-There is a shorthand to define the `completed` and `failed` actions in the typical case: `options.asyncResult`. The following are equivalent:
+There is a shorthand to define the `completed` and `failed` actions in the typical case: `.asyncResult`. The following are equivalent:
 
 ```javascript
-new airflux.Action({
-    children: [ 'progressed', 'completed', 'failed' ]
-});
+new airflux.Action().withChildren( [ 'progressed', 'completed', 'failed' ] );
 
-new airflux.Action({
-    asyncResult: true,
-    children: [ 'progressed' ]
-});
+new airflux.Action().asyncResult().withChilren( [ 'progressed ' ] );
 ```
 
 There are a couple of helper methods available to trigger the `completed` and `failed` actions:
@@ -137,6 +132,8 @@ There are a couple of helper methods available to trigger the `completed` and `f
 Therefore, the following are all equivalent:
 
 ```javascript
+var asyncResultAction = new airflux.Action().asyncResult();
+
 asyncResultAction.listen( ( arguments ) =>
     someAsyncOperation( arguments )
         .then( asyncResultAction.completed )
@@ -148,6 +145,40 @@ asyncResultAction.listen( ( arguments ) => asyncResultAction.promise( someAsyncO
 asyncResultAction.listen( someAsyncOperation );
 ```
 
+`.asyncResult` can take the listen function as a parameter. Therefore, the declaration before can be simplified as:
+
+```javascript
+var asyncResultAction = new airflux.Action().asyncResult( someAsyncOperation );
+```
+
+#### Actions as functor
+
+In order to be used easily, actions should be converted to a functor using either `asFunction` or `asSyncFunction`.
+Every functor contains an attribute `.action` in order to get the original action object.
+Action or Functor can be passed to `listenTo`, with the same result.
+
+
+```javascript
+var action = new airflux.Action().asFunction;
+
+// trigger the action, using the default asynchronous functor
+action();
+
+
+var syncActionFn = new airflux.Action().asSyncFunction;
+
+// trigger the action, synchronously
+syncActionFn();
+
+
+var actionObject = new airflux.Action();
+var actionObjectFn = new airflux.Action().asFunction;
+
+actionObjectFn.action === actionObject;
+
+```
+
+
 ##### Asynchronous actions as Promises
 
 Asynchronous actions can be used as promises, which is particularly useful for server-side rendering when you must await the successful (or failed) completion of an action before rendering.
@@ -156,11 +187,12 @@ Suppose you had an action + store to make an API request:
 
 ```javascript
 // Create async action with `completed` & `failed` children
-var makeRequest = new airflux.Action({ asyncResult: true });
+var makeRequest = new airflux.Action().asyncResult();
 
 class RequestStore extends airflux.Store {
     constructor() {
-        this.listenTo(makeRequest, this.onMakeRequest );
+        super();
+        this.listenTo( makeRequest, this.onMakeRequest );
     }
 
     onMakeRequest( url ) {
@@ -208,10 +240,10 @@ actions.statusUpdate( 1 );
 You can also set the hooks by sending them in a definition object as you create the action:
 
 ```javascript
-var action = new airflux.Action({
-    preEmit: () => { /* ... */ },
-    shouldEmit: () => { /* ... */ }
-});
+var action = new airflux.Action();
+
+action.preEmit = () => { /* ... */ };
+action.shouldEmit = () => { /* ... */ };
 ```
 
 [Back to top](#content)
@@ -339,7 +371,7 @@ status:  OFFLINE
 
 ### React component example
 
-Using airflux inside your React component can be done in three ways: 
+Using airflux inside your React component can be done in three ways:
 - manually or by doing a pimpl of Listener
 - by extending FluxComponent
 
@@ -443,28 +475,6 @@ Don't like to use the EventEmitter provided? You can switch to another one, such
 ```javascript
 // Do this before creating actions or stores
 airflux.setEventEmitter(require('events').EventEmitter);
-```
-
-### Switching Promise library
-
-Don't like to use the Promise library provided? You can switch to another one, such as [Bluebird](https://github.com/petkaantonov/bluebird/) like this:
-
-```javascript
-// Do this before triggering actions
-airflux.setPromise(require('bluebird'));
-```
-
-> Note that promises are constructed with `new Promise(...)`.  If your Promise library uses factories (e.g. `Q`), then use `airflux.setPromiseFactory()` instead.
-
-### Switching Promise factory
-
-Since most Promise libraries use constructors (e.g. `new Promise(...)`), this is the default behavior.
-
-However, if you use `Q` or another library that uses a factory method, you can use `airflux.setPromiseFactory()` for it.
-
-```javascript
-// Do this before triggering actions
-airflux.setPromiseFactory(require('Q').Promise);
 ```
 
 ### Switching nextTick()
