@@ -45,7 +45,7 @@ exports.object = function(keys,vals){
 exports.Promise = require('es6-promise').Promise;
 
 exports.createPromise = function(resolver) {
-    return new exports.Promise(resolver);
+    return new Promise(resolver);
 };
 
 exports.isArguments = function(value) {
