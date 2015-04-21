@@ -16,7 +16,6 @@ exports.joinStrict = JoinStores.JoinStrict;
 exports.joinConcat = JoinStores.JoinConcat;
 
 exports.EventEmitter = _.EventEmitter;
-exports.Promise = _.Promise;
 
 /**
  * Sets the eventmitter that Airflux uses

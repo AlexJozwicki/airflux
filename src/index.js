@@ -17,7 +17,7 @@ exports.joinConcat      = JoinStores.JoinConcat;
 
 
 exports.EventEmitter    = _.EventEmitter;
-exports.Promise         = _.Promise;
+
 
 
 /**

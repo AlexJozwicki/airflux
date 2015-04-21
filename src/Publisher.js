@@ -262,7 +262,7 @@ class Publisher {
             });
         });
 
-        var joinedPromise = _.Promise.all(mappedPromises);
+        var joinedPromise = Promise.all(mappedPromises);
         return this.resolve(joinedPromise);
     }
 }   // class Publisher

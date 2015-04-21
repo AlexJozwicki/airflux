@@ -331,7 +331,7 @@ var Publisher = (function () {
                     });
                 });
 
-                var joinedPromise = _.Promise.all(mappedPromises);
+                var joinedPromise = Promise.all(mappedPromises);
                 return this.resolve(joinedPromise);
             }
         }
