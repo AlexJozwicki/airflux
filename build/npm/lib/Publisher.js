@@ -158,9 +158,9 @@ var Publisher = (function () {
                 }
 
                 promise.then(function (response) {
-                    return _this.completed(response);
+                    return _this.completed.asFunction(response);
                 })["catch"](function (error) {
-                    return _this.failed(error);
+                    return _this.failed.asFunction(error);
                 });
             })
         },
@@ -172,6 +172,8 @@ var Publisher = (function () {
              *
              * @param {Object} promise The result to use or a promise to which to listen.
              */
+            // TODO: MOVE TO ACTION
+            // as calling completed and failed is completely specific to an action, this should be moved to the Action class.
 
             value: function resolve(promise) {
                 var _this = this;
@@ -184,14 +186,14 @@ var Publisher = (function () {
                 }
 
                 if (!_.isPromise(promise)) {
-                    this.completed(promise);
+                    this.completed.asFunction(promise);
                     return;
                 }
 
                 promise.then(function (response) {
-                    return _this.completed(response);
+                    return _this.completed.asFunction(response);
                 }, function (error) {
-                    return _this.failed(error);
+                    return _this.failed.asFunction(error);
                 });
             }
         },
@@ -229,7 +231,7 @@ var Publisher = (function () {
         },
         canHandlePromise: {
             value: function canHandlePromise() /*:boolean*/{
-                return this.completed && this.failed && this.completed._isActionFunctor && this.failed._isActionFunctor;
+                return this.completed && this.failed; // && this.completed._isActionFunctor && this.failed._isActionFunctor;
             }
         },
         triggerSync: {

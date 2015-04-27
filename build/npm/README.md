@@ -80,38 +80,45 @@ For a full example check the [`test/index.js`](test/index.js) file.
 
 ### Creating actions
 
-Create an action by creation an object from the class `airflux.Action`, with an optional options object.
+Create an action by creation an object from the class `airflux.Action`.
 
 ```javascript
-var statusUpdate = new airflux.Action(options);
+var statusUpdateAction = new airflux.Action();
 ```
 
-An action is a [functor](http://en.wikipedia.org/wiki/Function_object) that can be invoked like any function.
+An action can then be transformed to a [functor](http://en.wikipedia.org/wiki/Function_object) that can be invoked like any function.
 
 ```javascript
+var statusUpdate = statusUpdateAction.asFunction;
 statusUpdate( data ); // Invokes the action statusUpdate
 ```
 
-If `options.sync` is true, the functor will instead call `action.triggerSync()` which is a synchronous operation.
+You can use `.asSyncFunction` to transform the action into a synchronous operation.
 
 
 #### Asynchronous actions
 
-For actions that represent asynchronous operations (e.g. API calls), a few separate dataflows result from the operation. In the most typical case, we consider completion and failure of the operation. To create related actions for these dataflows, which you can then access as attributes, use `options.children`.
+For actions that represent asynchronous operations (e.g. API calls), a few separate dataflows result from the operation. In the most typical case, we consider completion and failure of the operation.
+To create related actions for these dataflows, which you can then access as attributes, use `.withChildren`.
+
+Children are created on the parent action as Action.
+They're created on the functor of the parent action as functor themselves.
+
 
 ```javascript
 // this creates 'load', 'load.completed' and 'load.failed'
-var actions = {
-    load: new airflux.Action().withChilden( [ 'completed', 'failed'] );
-};
+var loadAction = new airflux.Action().withChilden( [ 'completed', 'failed'] );
+console.log( loadAction.completed instanceof Action ); // true
+
+var load = loadAction.asFunction;
 
 // when 'load' is triggered, call async operation and trigger related actions
-actions.load.listen( () => {
+load.listen( () => {
     // By default, the listener is bound to the action
     // so we can access child actions using 'this'
     someAsyncOperation()
-        .then(this.completed)
-        .catch(this.failed);
+        .then( this.completed ) // here completed if the functor of the .completed action
+        .catch( this.failed );
 });
 ```
 
@@ -132,7 +139,7 @@ There are a couple of helper methods available to trigger the `completed` and `f
 Therefore, the following are all equivalent:
 
 ```javascript
-var asyncResultAction = new airflux.Action().asyncResult();
+var asyncResultAction = new airflux.Action().asyncResult().asFunction;
 
 asyncResultAction.listen( ( arguments ) =>
     someAsyncOperation( arguments )

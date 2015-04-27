@@ -24,6 +24,7 @@ var Action = (function (_Publisher) {
         _classCallCheck(this, Action);
 
         _get(Object.getPrototypeOf(Action.prototype), "constructor", this).call(this);
+        this.children = {};
 
         Object.defineProperty(this, "sync", { value: sync });
     }
@@ -45,8 +46,11 @@ var Action = (function (_Publisher) {
             value: function asyncResult() {
                 var listenFunction = arguments[0] === undefined ? void 0 : arguments[0];
 
-                Object.defineProperty(this, "completed", { value: new Action(false).asFunction });
-                Object.defineProperty(this, "failed", { value: new Action(false).asFunction });
+                this.children.completed = new Action();
+                Object.defineProperty(this, "completed", { value: this.children.completed });
+
+                this.children.failed = new Action();
+                Object.defineProperty(this, "failed", { value: this.children.failed });
 
                 if (typeof listenFunction === "function") {
                     this.listen(listenFunction);
@@ -64,8 +68,16 @@ var Action = (function (_Publisher) {
             value: function withChildren(children) {
                 var _this = this;
 
-                children.forEach(function (childName) {
-                    return Object.defineProperty(_this, childName, { value: new Action().asFunction });
+                children.forEach(function (child) {
+                    if (typeof child === "string") {
+                        var action = new Action();
+                        _this.children[child] = action;
+                        Object.defineProperty(_this, child, { value: action });
+                    } else if (Array.isArray(child) && typeof child[0] === "string" && child[1] instanceof Action) {
+                        var _name = child[0];
+                        _this.children[_name] = child[1];
+                        Object.defineProperty(_this, _name, { value: child[1] });
+                    }
                 });
                 return this;
             }
@@ -93,7 +105,7 @@ var Action = (function (_Publisher) {
         _createFunctor: {
 
             /**
-             *    
+             *
              */
 
             value: function _createFunctor() {
@@ -112,6 +124,10 @@ var Action = (function (_Publisher) {
                 Object.defineProperty(functor, "listenOnce", { value: function (fn, bindCtx) {
                         return Action.prototype.listenOnce.call(_this, fn, bindCtx);
                     } });
+
+                Object.keys(this.children).forEach(function (childName) {
+                    Object.defineProperty(functor, childName, { value: _this.children[childName].asFunction });
+                });
 
                 return functor;
             }

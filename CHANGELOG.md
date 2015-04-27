@@ -1,3 +1,24 @@
+## 0.2.2
+
+Child action are now created as Action and not functor on the parent action.
+Child actions are added as functors on the functor of the parent action.
+
+```
+var action/*:Action*/ = new Action().asyncResult( fetch( 'url' ) );
+console.log( action.completed instanceof Action ); // true
+console.log( action.failed instanceof Action ); // true
+
+var functor = action.asFunction;
+console.log( typeof functor.completed ); // function
+```
+
+Child actions can now be created by passing a fully created action, and not only its name:
+```
+var action/*:Action*/ = new Action().withChildren( [ 'foo', [ 'bar', new Action( true ) ] ] );
+```
+
+
+
 ## 0.2.1
 
 Dropping the in-library support for Promise polyfill.
