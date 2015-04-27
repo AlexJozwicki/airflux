@@ -116,8 +116,8 @@ class Publisher {
             throw new Error('Publisher must have "completed" and "failed" child publishers');
         }
 
-        promise.then( ( response ) => this.completed( response ) )
-               .catch( ( error ) => this.failed( error ) );
+        promise.then( ( response ) => this.completed.asFunction( response ) )
+               .catch( ( error ) => this.failed.asFunction( error ) );
     }
 
     /**
@@ -126,6 +126,8 @@ class Publisher {
      *
      * @param {Object} promise The result to use or a promise to which to listen.
      */
+     // TODO: MOVE TO ACTION
+     // as calling completed and failed is completely specific to an action, this should be moved to the Action class.
     resolve( promise ) {
         // Note: To support mixins, we need to access the method this way.
         //   Overrides are not possible.
@@ -135,11 +137,11 @@ class Publisher {
         }
 
         if( !_.isPromise( promise ) ) {
-            this.completed( promise );
+            this.completed.asFunction( promise );
             return;
         }
 
-        promise.then( ( response ) => this.completed( response ), ( error ) => this.failed( error ) );
+        promise.then( ( response ) => this.completed.asFunction( response ), ( error ) => this.failed.asFunction( error ) );
     }
 
 
@@ -176,7 +178,7 @@ class Publisher {
 
 
     canHandlePromise()/*:boolean*/ {
-        return this.completed && this.failed && this.completed._isActionFunctor && this.failed._isActionFunctor;
+        return this.completed && this.failed;// && this.completed._isActionFunctor && this.failed._isActionFunctor;
     }
 
     /**

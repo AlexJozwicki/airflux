@@ -9,25 +9,49 @@ describe('Creating action', function() {
     it("should create specified child actions",function(){
         var action = new airflux.Action().withChildren( ["foo","BAR"] );
 
-        assert.isFunction( action.foo );
-        assert.isFunction( action.BAR );
-        assert.instanceOf( action.foo.action, airflux.Action );
-        assert.instanceOf( action.BAR.action, airflux.Action );
+        assert.instanceOf( action.foo, airflux.Action );
+        assert.instanceOf( action.BAR, airflux.Action );
         assert.isFunction( action.foo.listen );
         assert.isFunction( action.BAR.listen );
+
+        assert.deepEqual( Object.keys( action.children ), [ 'foo', 'BAR' ] );
+    });
+
+    it("should create specified custom child actions",function(){
+        var barAction = new airflux.Action( true );
+        var action = new airflux.Action().withChildren( [ [ 'BAR', barAction ] ] );
+
+        assert.instanceOf( action.BAR, airflux.Action );
+        assert.equal( action.children.BAR, barAction );
     });
 
     it("should create completed and failed child actions for async actions",function(){
         var action = new airflux.Action().asyncResult();
 
-        assert.isFunction( action.completed );
-        assert.isFunction( action.failed );
-        assert.equal( action.completed._isActionFunctor, true );
-        assert.equal( action.failed._isActionFunctor, true );
-        assert.instanceOf( action.completed.action, airflux.Action);
-        assert.instanceOf( action.failed.action, airflux.Action );
+        assert.instanceOf( action.completed, airflux.Action);
+        assert.instanceOf( action.failed, airflux.Action );
         assert.isFunction( action.completed.listen );
         assert.isFunction( action.failed.listen );
+
+        var functor = action.asFunction;
+        assert.isFunction( functor.completed );
+        assert.isFunction( functor.failed );
+        assert.equal( functor.completed._isActionFunctor, true );
+        assert.equal( functor.failed._isActionFunctor, true );
+    });
+
+
+    it("should add completed and failed child functors on the functor of async actions",function(){
+        var functor = new airflux.Action().asyncResult().asFunction;
+
+        assert.isFunction( functor.completed );
+        assert.isFunction( functor.failed );
+        assert.equal( functor.completed._isActionFunctor, true );
+        assert.equal( functor.failed._isActionFunctor, true );
+        assert.instanceOf( functor.completed.action, airflux.Action);
+        assert.instanceOf( functor.failed.action, airflux.Action );
+        assert.isFunction( functor.completed.listen );
+        assert.isFunction( functor.failed.listen );
     });
 
     var action,
@@ -202,21 +226,21 @@ describe('Creating actions with children to an action definition object', functi
     });
 
     it('should contain Action functor on foo and bar children', function() {
-        assert.isFunction( actions.foo.completed );
+/*        assert.isFunction( actions.foo.completed );
         assert.isFunction( actions.foo.failed );
         assert.isFunction( actions.bar.baz );
 
         assert.equal( actions.foo.completed._isActionFunctor, true );
         assert.equal( actions.foo.failed._isActionFunctor, true );
         assert.equal( actions.bar.baz._isActionFunctor, true );
-
+*/
         assert.isFunction( actions.foo.completed.listen );
         assert.isFunction( actions.foo.failed.listen );
         assert.isFunction( actions.bar.baz.listen );
 
-        assert.instanceOf( actions.foo.completed.action, airflux.Action);
-        assert.instanceOf( actions.foo.failed.action, airflux.Action);
-        assert.instanceOf( actions.bar.baz.action, airflux.Action);
+        assert.instanceOf( actions.foo.completed, airflux.Action);
+        assert.instanceOf( actions.foo.failed, airflux.Action);
+        assert.instanceOf( actions.bar.baz, airflux.Action);
     });
 
     describe('when listening to the child action created this way', function() {
@@ -232,7 +256,7 @@ describe('Creating actions with children to an action definition object', functi
 
         it('should receive the correct arguments', function() {
             var testArgs = [1337, 'test'];
-            actions.bar.baz( testArgs[0], testArgs[1] );
+            actions.bar.baz.trigger( testArgs[0], testArgs[1] );
 
             return assert.eventually.deepEqual(promise, testArgs);
         });

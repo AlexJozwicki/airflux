@@ -11,6 +11,7 @@ class Action extends Publisher {
 
     constructor( sync/*:boolean*/ = false ) {
         super();
+        this.children = {};
 
         Object.defineProperty( this, 'sync', { value: sync } );
     }
@@ -25,8 +26,11 @@ class Action extends Publisher {
      * If the listen function returns a Promise, the Promise will be automatically mapped onto these two children actions.
      */
     asyncResult( listenFunction = void 0 ) {
-        Object.defineProperty( this, 'completed', { value: new Action( false ).asFunction } );
-        Object.defineProperty( this, 'failed', { value: new Action( false ).asFunction } );
+        this.children.completed = new Action();
+        Object.defineProperty( this, 'completed', { value: this.children.completed } );
+
+        this.children.failed = new Action();
+        Object.defineProperty( this, 'failed', { value: this.children.failed } );
 
         if( typeof listenFunction === 'function' ) {
             this.listen( listenFunction );
@@ -40,7 +44,18 @@ class Action extends Publisher {
      * Creates children actions
      */
     withChildren( children ) {
-        children.forEach( ( childName ) => Object.defineProperty( this, childName, { value: new Action().asFunction } ) );
+        children.forEach( ( child ) => {
+            if( typeof child === 'string' ) {
+                let action = new Action();
+                this.children[ child ] = action;
+                Object.defineProperty( this, child, { value: action } );
+            }
+            else if( Array.isArray( child ) && typeof child[0] === 'string' && child[1] instanceof Action ) {
+                let name = child[ 0 ];
+                this.children[ name ] = child[ 1 ];
+                Object.defineProperty( this, name, { value: child[ 1 ] } );
+            }
+        });
         return this;
     }
 
@@ -63,7 +78,7 @@ class Action extends Publisher {
 
 
     /**
-     *    
+     *
      */
     _createFunctor( sync = false ) {
         var trigger = sync ? this.triggerSync : this.trigger;
@@ -77,6 +92,10 @@ class Action extends Publisher {
         Object.defineProperty( functor, 'listenOnce', { value: ( fn, bindCtx ) => {
             return Action.prototype.listenOnce.call( this, fn, bindCtx );
         } } );
+
+        Object.keys( this.children ).forEach( ( childName ) => {
+            Object.defineProperty( functor, childName, { value: this.children[ childName ].asFunction } );
+        });
 
 
         return functor;
