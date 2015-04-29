@@ -11,7 +11,7 @@ class FluxConnection extends FluxComponent {
     }
 
     injectStores( component ) {
-        return React.addons.cloneWithProps( component, this.state );
+        return React.cloneElement( component, this.state );
     }
 
     render() {

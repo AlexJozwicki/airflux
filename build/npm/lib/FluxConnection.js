@@ -27,7 +27,7 @@ var FluxConnection = (function (_FluxComponent) {
     _createClass(FluxConnection, {
         injectStores: {
             value: function injectStores(component) {
-                return React.addons.cloneWithProps(component, this.state);
+                return React.cloneElement(component, this.state);
             }
         },
         render: {
