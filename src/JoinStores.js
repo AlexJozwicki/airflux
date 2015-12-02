@@ -6,7 +6,7 @@ function joinClassFactory( join ) {
         constructor() {
             super();
 
-            var listenables = [ ...arguments, 'trigger' ];
+            var listenables = [ 'trigger', ...arguments ];
             this[join]( ...listenables );
         }
     };
