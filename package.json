@@ -1,6 +1,6 @@
 {
   "name": "airflux",
-  "version": "0.2.2",
+  "version": "0.3.0-alpha1",
   "description": "A pure ES6 fork of the Reflux data flow library similar to Facebook Flux",
   "main": "src",
   "scripts": {
@@ -23,20 +23,20 @@
     "react",
     "flux",
     "reflux",
-    "airflux",
     "airflux"
   ],
   "dependencies": {
     "eventemitter3": "^0.1.2"
   },
   "peerDependencies": {
-    "react": "0.13.x"
+    "react": "0.14.x"
   },
   "devDependencies": {
-    "babel": "^4.7.16",
-    "babelify": "^5.0.4",
+    "babel": "^6.1.18",
+    "babel-core": "^6.2.1",
+    "babelify": "^7.2.0",
     "benchmark": "^1.0.0",
-    "browserify": "^5.11.1",
+    "browserify": "^12.0.1",
     "chai": "^1.9.1",
     "chai-as-promised": "^4.1.1",
     "grunt": "^0.4.5",
@@ -50,13 +50,12 @@
     "karma": "0.12.23",
     "karma-bro": "^0.7.0",
     "karma-commonjs": "0.0.11",
-    "karma-mocha": "^0.1.9",
+    "karma-mocha": "^0.2.1",
     "karma-phantomjs-launcher": "^0.1.4",
     "karma-sauce-launcher": "^0.2.10",
     "karma-spec-reporter": "0.0.13",
     "matchdep": "^0.3.0",
-    "mocha": "^1.21.3",
-    "react": "0.13.x",
+    "react": "0.14.x",
     "sinon": "^1.10.3"
   }
 }

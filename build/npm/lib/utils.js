@@ -2,22 +2,20 @@
  * isObject, extend, isFunction, isArguments are taken from undescore/lodash in
  * order to remove the dependency
  */
-"use strict";
-
 var isObject = exports.isObject = function (obj) {
     var type = typeof obj;
-    return type === "function" || type === "object" && !!obj;
+    return type === 'function' || type === 'object' && !!obj;
 };
 
 exports.isFunction = function (value) {
-    return typeof value === "function";
+    return typeof value === 'function';
 };
 
 exports.isPromise = function (value) {
-    return value && (typeof value === "object" || typeof value === "function") && typeof value.then === "function";
+    return value && (typeof value === 'object' || typeof value === 'function') && typeof value.then === 'function';
 };
 
-exports.EventEmitter = require("eventemitter3");
+exports.EventEmitter = require('eventemitter3');
 
 exports.nextTick = function (callback) {
     setTimeout(callback, 0);
@@ -41,7 +39,7 @@ exports.object = function (keys, vals) {
 };
 
 exports.isArguments = function (value) {
-    return typeof value === "object" && "callee" in value && typeof value.length === "number";
+    return typeof value === 'object' && 'callee' in value && typeof value.length === 'number';
 };
 
 exports.throwIf = function (val, msg) {

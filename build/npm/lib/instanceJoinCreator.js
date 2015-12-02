@@ -1,5 +1,3 @@
-"use strict";
-
 var _ = require("./utils");
 
 var slice = Array.prototype.slice;
@@ -10,8 +8,8 @@ var slice = Array.prototype.slice;
  * @returns {Function} An instance method which sets up a join listen on the given listenables using the given strategy
  */
 module.exports = function instanceJoinCreator(strategy) {
-    return function () {
-        _.throwIf(arguments.length < 3, "Cannot create a join with less than 2 listenables!");
+    return function () /* listenables..., callback*/{
+        _.throwIf(arguments.length < 3, 'Cannot create a join with less than 2 listenables!');
 
         var listenables = slice.call(arguments);
         var callback = listenables.pop();
@@ -49,7 +47,7 @@ function makeStopper(subobj, cancels, context) {
         var i,
             subs = context.subscriptions,
             index = subs ? subs.indexOf(subobj) : -1;
-        _.throwIf(index === -1, "Tried to remove join already gone from subscriptions list!");
+        _.throwIf(index === -1, 'Tried to remove join already gone from subscriptions list!');
         for (i = 0; i < cancels.length; ++i) {
             cancels[i]();
         }
@@ -91,4 +89,3 @@ function emitIfAllListenablesEmitted(join) {
     join.callback.apply(join.listener, join.args);
     reset(join);
 }
-/* listenables..., callback*/
