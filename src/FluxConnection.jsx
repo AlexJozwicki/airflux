@@ -1,27 +1,34 @@
-var React   = require( 'react' );
-var FluxComponent   = require( './FluxComponent' );
+import React, { Component }   from 'react';
+import Flux from './Flux';
+import type { Listenable } from './Listenable';
+
+
+type FluxConnectionProps = {
+    stores: { [ key: string ]: Listenable };
+};
 
 
 /**
  * A component that is wired on Airflux or Reflux stores.
  */
-class FluxConnection extends FluxComponent {
-    constructor( props ) {
-        super( props, props.stores || {} );
+@Flux
+export default class FluxConnection extends Component {
+    constructor( props: FluxConnectionProps ) {
+        super( props );
+        const stores = props.stores;
+        Object.keys( props.stores ).forEach( ( key ) => this.listenTo( stores[ key ], key ) );
     }
 
-    injectStores( component ) {
+    _injectStores( component: ReactElement ) {
         return React.cloneElement( component, this.state );
     }
 
-    render() {
+    render() : ReactElement {
         if( React.Children.count( this.props.children ) === 0 ) {
-            return this.injectStores( React.Children.only( this.props.children ) );
+            return this._injectStores( React.Children.only( this.props.children ) );
         }
         else {
-            return <span>{ React.Children.map( this.props.children, ( child ) => this.injectStores( child ) ) }</span>;
+            return <span>{ React.Children.map( this.props.children, ( child ) => this._injectStores( child ) ) }</span>;
         }
     }
 }
-
-module.exports = FluxConnection;

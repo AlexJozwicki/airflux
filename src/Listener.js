@@ -1,9 +1,11 @@
-var _           = require('./utils');
-var Publisher   = require('./Publisher');
-var instanceJoinCreator = require('./instanceJoinCreator');
+/* @flow */
+import * as _ from './utils';
+import Publisher from './Publisher';
+import instanceJoinCreator from './instanceJoinCreator';
 
 
-/*:: type SubscriptionObj = { stop: Function; listenable: Action|Store }; */
+export type SubscriptionObj = { stop: Function; listenable: Action|Store };
+export type Listenable = Action | Store;
 
 
 /**
@@ -11,8 +13,8 @@ var instanceJoinCreator = require('./instanceJoinCreator');
  * @constructor
  * @extends {Publisher}
  */
-class Listener extends Publisher {
-    /*:: subscriptions: Array< SubscriptionObj >;*/
+export default class Listener extends Publisher {
+    subscriptions: Array< SubscriptionObj >;
 
     constructor() {
         super();
@@ -26,7 +28,7 @@ class Listener extends Publisher {
      * @param {Action|Store} listenable The listenable we want to search for
      * @returns {Boolean} The result of a recursive search among `this.subscriptions`
      */
-    hasListener( listenable/*:Action|Store*/ )  {
+    hasListener( listenable: Listenable ) {
         var subs = this.subscriptions || [];
         for (var i = 0; i < subs.length; ++i) {
             var listenables = [].concat(subs[i].listenable);
@@ -49,7 +51,7 @@ class Listener extends Publisher {
      *
      * @param {Object} listenables An object of listenables. Keys will be used as callback method names.
      */
-    listenToMany( listenables/*:Action|Store*/ ) {
+    listenToMany( listenables: Listenable ) {
         var allListenables = flattenListenables(listenables);
         for (var key in allListenables) {
             var cbname = _.callbackName(key);
@@ -72,7 +74,7 @@ class Listener extends Publisher {
      *  listened to.
      * @returns {String|Undefined} An error message, or undefined if there was no problem.
      */
-    validateListening( listenable/*:Action|Store*/ ) {
+    validateListening( listenable: Listenable ) {
         if (listenable === this) {
             return 'Listener is not able to listen to itself';
         }
@@ -93,7 +95,7 @@ class Listener extends Publisher {
      * @param {Function|String} defaultCallback The callback to register as default handler
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
-    listenTo( listenable/*:Action|Store*/, callback/*:Function|string*/, defaultCallback/*:Function:string*/ )/*:SubscriptionObj*/  {
+    listenTo( listenable: Listenable, callback: Function | string, defaultCallback: Function : string ) : SubscriptionObj  {
         _.throwIf(this.validateListening(listenable));
 
         this.fetchInitialState(listenable, defaultCallback);
@@ -122,7 +124,7 @@ class Listener extends Publisher {
      * @param {Action|Store} listenable The action or store we no longer want to listen to
      * @returns {Boolean} True if a subscription was found and removed, otherwise false.
      */
-    stopListeningTo( listenable/*:Action|Store*/ )/*:boolean*/ {
+    stopListeningTo( listenable: Listenable ) : boolean {
         var subs = this.subscriptions || [];
         for (var i = 0; i < subs.length; ++i) {
             var sub = subs[i];
@@ -154,7 +156,7 @@ class Listener extends Publisher {
      * @param {Action|Store} listenable The publisher we want to get initial state from
      * @param {Function|String} defaultCallback The method to receive the data
      */
-    fetchInitialState( listenable/*:Action|Store*/, defaultCallback/*:Function|string*/ ) {
+    fetchInitialState( listenable: Listenable, defaultCallback: Function | string ) {
         if (typeof defaultCallback === 'string') {
             defaultCallback = this[defaultCallback];
         }
@@ -255,6 +257,3 @@ var flattenListenables = function( listenables/*:Action|Store*/ ) {
 
     return flattened;
 };
-
-
-module.exports = Listener;

@@ -1,7 +1,8 @@
-var Store = require("./Store");
+/* @flow */
+import Store from './Store';
 
 
-function joinClassFactory( join ) {
+function joinClassFactory( join: string ) {
     return class extends Store {
         constructor() {
             super();
@@ -19,9 +20,7 @@ var JoinTrailingStore   = joinClassFactory( 'joinTrailing' );
 var JoinConcatStore     = joinClassFactory( 'joinConcat' );
 
 
-module.exports = {
-    JoinStrict  : function() { return new JoinStrictStore( ...arguments ); },
-    JoinLeading : function() { return new JoinLeadingStore( ...arguments ); },
-    JoinTrailing: function() { return new JoinTrailingStore( ...arguments ); },
-    JoinConcat  : function() { return new JoinConcatStore( ...arguments ); }
-};
+export function JoinStrict() { return new JoinStrictStore( ...arguments );
+export function JoinLeading() { return new JoinLeadingStore( ...arguments ); },
+export function JoinTrailing() { return new JoinTrailingStore( ...arguments ); },
+export function JoinConcat() { return new JoinConcatStore( ...arguments ); }

@@ -1,3 +1,5 @@
+'use strict';
+
 var _ = require("./utils");
 
 var slice = Array.prototype.slice;

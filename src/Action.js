@@ -1,19 +1,16 @@
-var Publisher = require( './Publisher' );
+/* @flow */
+import Publisher from './Publisher';
+import type { Functor } from './Publisher';
 
 
 
 /**
- *
+ * @abstract
  */
-class Action extends Publisher {
-    /*:: preEmit        : Function;*/
-    /*:: shouldEmit     : Function ;*/
-
-    constructor( sync/*:boolean*/ = false ) {
+export default class Action extends Publisher {
+    constructor( sync: boolean = false ) {
         super();
         this.children = {};
-
-        Object.defineProperty( this, 'sync', { value: sync } );
     }
 
 
@@ -25,7 +22,7 @@ class Action extends Publisher {
      *
      * If the listen function returns a Promise, the Promise will be automatically mapped onto these two children actions.
      */
-    asyncResult( listenFunction = void 0 ) {
+    asyncResult( listenFunction: ?Function = void 0 ) {
         this.children.completed = new Action();
         Object.defineProperty( this, 'completed', { value: this.children.completed } );
 
@@ -63,14 +60,14 @@ class Action extends Publisher {
     /**
      * Returns a synchronous function to trigger the action
      */
-    get asSyncFunction() {
+    get asSyncFunction() : Functor {
         return this._createFunctor( true );
     }
 
     /**
     * Returns a function to trigger the action, async or sync depending on the action definition.
      */
-    get asFunction() {
+    get asFunction() : Functor {
         return this._createFunctor( this.sync );
     }
 
@@ -80,8 +77,8 @@ class Action extends Publisher {
     /**
      *
      */
-    _createFunctor( sync = false ) {
-        var trigger = sync ? this.triggerSync : this.trigger;
+    _createFunctor( sync: boolean = false ) : Functor {
+        const trigger = sync ? this.triggerSync : this.triggerPromise;
         var functor = trigger.bind( this );
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );
@@ -101,9 +98,6 @@ class Action extends Publisher {
         return functor;
     }
 
-    get eventType() /*:string*/ { return 'event'; }
-    get isAction()  /*:boolean*/ { return true; }
+    get eventType() : string { return 'event'; }
+    get isAction()  : boolean { return true; }
 }
-
-
-module.exports = Action;

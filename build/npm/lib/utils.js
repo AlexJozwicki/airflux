@@ -1,9 +1,13 @@
+'use strict';
+
+function _typeof(obj) { return obj && typeof Symbol !== "undefined" && obj.constructor === Symbol ? "symbol" : typeof obj; }
+
 /*
  * isObject, extend, isFunction, isArguments are taken from undescore/lodash in
  * order to remove the dependency
  */
 var isObject = exports.isObject = function (obj) {
-    var type = typeof obj;
+    var type = typeof obj === 'undefined' ? 'undefined' : _typeof(obj);
     return type === 'function' || type === 'object' && !!obj;
 };
 
@@ -12,7 +16,7 @@ exports.isFunction = function (value) {
 };
 
 exports.isPromise = function (value) {
-    return value && (typeof value === 'object' || typeof value === 'function') && typeof value.then === 'function';
+    return value && ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' || typeof value === 'function') && typeof value.then === 'function';
 };
 
 exports.EventEmitter = require('eventemitter3');
@@ -39,7 +43,7 @@ exports.object = function (keys, vals) {
 };
 
 exports.isArguments = function (value) {
-    return typeof value === 'object' && 'callee' in value && typeof value.length === 'number';
+    return (typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && 'callee' in value && typeof value.length === 'number';
 };
 
 exports.throwIf = function (val, msg) {

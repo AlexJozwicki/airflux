@@ -1,4 +1,5 @@
-var _ = require("./utils");
+/* @flow */
+import * as _ from './utils';
 
 var slice = Array.prototype.slice;
 
@@ -8,7 +9,7 @@ var slice = Array.prototype.slice;
  * @param {String} strategy Which strategy to use when tracking listenable trigger arguments
  * @returns {Function} An instance method which sets up a join listen on the given listenables using the given strategy
  */
-module.exports = function instanceJoinCreator(strategy) {
+export default function instanceJoinCreator(strategy) {
     return function(/* listenables..., callback*/) {
         _.throwIf(arguments.length < 3,
                 'Cannot create a join with less than 2 listenables!');

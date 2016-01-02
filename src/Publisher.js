@@ -1,13 +1,14 @@
-var _ = require('./utils');
+/* @flow */
+import * as _ from './utils';
 
 
 /**
  * @constructor
  */
-class Publisher {
-    /*:: emitter            : any;*/
-    /*:: children           : Array< any >;*/
-    /*:: _dispatchPromises  : Array< any >;*/
+export default class Publisher {
+    emitter            : any;
+    children           : Array< any >;
+    _dispatchPromises  : Array< any >;
 
 
     /**
@@ -19,8 +20,8 @@ class Publisher {
         this._dispatchPromises = [];
     }
 
-    get eventType()/*:string*/ { return 'event'; }
-    get isPublisher()/*:boolean*/ { return true; }
+    get eventType() : string { return 'event'; }
+    get isPublisher() : boolean { return true; }
 
 
     /**
@@ -30,7 +31,7 @@ class Publisher {
      * undefined, that will be passed on as arguments for shouldEmit and
      * emission.
      */
-    preEmit() {}
+    preEmit() : ?Object {}
 
     /**
      * Hook used by the publisher after `preEmit` to determine if the
@@ -39,7 +40,7 @@ class Publisher {
      *
      * @returns {Boolean} true if event should be emitted
      */
-    shouldEmit()/*:boolean*/ {
+    shouldEmit() : boolean {
         return true;
     }
 
@@ -50,12 +51,12 @@ class Publisher {
      * @param {Mixed} [optional] bindContext The context to bind the callback with
      * @returns {Function} Callback that unsubscribes the registered event handler
      */
-    listen( callback/*:Function*/, bindContext )/*:?Function*/ {
+    listen( callback: Function, bindContext ) : ?Function {
         var aborted = false;
         bindContext = bindContext || this;
 
         var eventHandler = ( args ) => {
-            if (aborted) {
+            if( aborted ) {
                 // This state is achieved when one listener removes another.
                 //   It might be considered a bug of EventEmitter2 which makes
                 //   a snapshot of the listener list before looping through them
@@ -64,20 +65,21 @@ class Publisher {
                 return;
             }
 
-            var result = callback.apply( bindContext, args );
+            const result : ?Promise = callback.apply( bindContext, args );
+
             if (_.isPromise(result)) {
                 // Note: To support mixins, we need to access the method this way.
                 //   Overrides are not possible.
                 //
                 //  TODO: check if we still need this with classes/do we allow override ?
-                var canHandlePromise/*:boolean*/ = Publisher.prototype.canHandlePromise.call( this );
-                if (!canHandlePromise) {
+                const canHandlePromise : boolean = this.canHandlePromise();
+                if( !canHandlePromise ) {
                     console.warn('Unhandled promise for ' + this.eventType);
                     return;
                 }
 
                 this._dispatchPromises.push({
-                    promise: result,
+                    promise : result,
                     listener: callback
                 });
             }
@@ -91,7 +93,7 @@ class Publisher {
     }
 
 
-    listenOnce( callback/*:Function*/, bindContext )/*:Function*/ {
+    listenOnce( callback: Function, bindContext ) : Function {
         bindContext = bindContext || this;
         var unsubscribe = this.listen( () => {
             var args = Array.prototype.slice.call(arguments);
@@ -107,12 +109,12 @@ class Publisher {
      *
      * @param {Object} The promise to attach to
      */
-    promise( promise ) {
-        var canHandlePromise/*:boolean*/ =
+    promise( promise: Promise ) {
+        var canHandlePromise : boolean =
             this.children.indexOf('completed') >= 0 &&
             this.children.indexOf('failed') >= 0;
 
-        if (!canHandlePromise){
+        if( !canHandlePromise ){
             throw new Error('Publisher must have "completed" and "failed" child publishers');
         }
 
@@ -128,11 +130,9 @@ class Publisher {
      */
      // TODO: MOVE TO ACTION
      // as calling completed and failed is completely specific to an action, this should be moved to the Action class.
-    resolve( promise ) {
-        // Note: To support mixins, we need to access the method this way.
-        //   Overrides are not possible.
-        var canHandlePromise/*:boolean*/ = Publisher.prototype.canHandlePromise.call(this);
-        if (!canHandlePromise) {
+    resolve( promise: Promise ) {
+        const canHandlePromise = this.canHandlePromise();
+        if( !canHandlePromise ) {
             throw new Error('Not an async publisher');
         }
 
@@ -156,9 +156,7 @@ class Publisher {
 
 
     then( onSuccess, onFailure ) {
-        // Note: To support mixins, we need to access the method this way.
-        //   Overrides are not possible.
-        var canHandlePromise/*:boolean*/ = Publisher.prototype.canHandlePromise.call(this);
+        const canHandlePromise : boolean = this.canHandlePromise();
         if (!canHandlePromise) {
             throw new Error('Not an async publisher');
         }
@@ -177,7 +175,7 @@ class Publisher {
     }
 
 
-    canHandlePromise()/*:boolean*/ {
+    canHandlePromise() : boolean {
         return this.completed && this.failed;// && this.completed._isActionFunctor && this.failed._isActionFunctor;
     }
 
@@ -193,18 +191,17 @@ class Publisher {
 
         if( this.shouldEmit.apply( this, args ) ) {
             this._dispatchPromises = [];
-            this.emitter.emit(this.eventType, args);
-            // Note: To support mixins, we need to access the method this way.
-            //   Overrides are not possible.
-            Publisher.prototype._handleDispatchPromises.call(this);
+            this.emitter.emit( this.eventType, args );
+
+            this._handleDispatchPromises();
         }
     }
 
     /**
      * Tries to publish the event on the next tick
      */
-    trigger() {
-        var args = arguments;
+    trigger() : Functor {
+        const args = arguments;
         _.nextTick( () => this.triggerSync.apply( this, args ) );
     }
 
@@ -212,27 +209,24 @@ class Publisher {
      * Returns a Promise for the triggered action
      */
     triggerPromise() {
-        // Note: To support mixins, we need to access the method this way.
-        //   Overrides are not possible.
-        var canHandlePromise = Publisher.prototype.canHandlePromise.call(this);
+        const canHandlePromise = this.canHandlePromise();
         if (!canHandlePromise) {
             throw new Error('Publisher must have "completed" and "failed" child publishers');
         }
 
-        var self = this;
-        var args = arguments;
+        const args = arguments;
 
-        var promise = new Promise(function( resolve, reject ) {
-            var removeSuccess = self.completed.listen( ( args ) => {
+        const promise = new Promise( ( resolve, reject ) => {
+            var removeSuccess = this.completed.listen( ( args ) => {
                 removeSuccess();
                 removeFailed();
-                resolve(args);
+                resolve( args );
             });
 
-            var removeFailed = self.failed.listen( ( args ) => {
+            var removeFailed = this.failed.listen( ( args ) => {
                 removeSuccess();
                 removeFailed();
-                reject(args);
+                reject( args );
             });
 
             self.trigger.apply( this, args );
@@ -267,7 +261,4 @@ class Publisher {
         var joinedPromise = Promise.all(mappedPromises);
         return this.resolve(joinedPromise);
     }
-}   // class Publisher
-
-
-module.exports = Publisher;
+}
