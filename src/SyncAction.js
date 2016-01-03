@@ -1,7 +1,7 @@
 import Action from './Action';
 
 
-export default class SyncAction extends AbstractAction {
+export default class SyncAction extends Action {
     constructor() {
         super( true );
     }

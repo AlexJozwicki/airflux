@@ -2,9 +2,10 @@ var chai    = require('chai');
 var assert  = chai.assert;
 
 
-import Action from '../src/Action';
-import Store from '../src/Store';
-import Listener from '../src/Listener';
+import Action       from '../src/Action';
+import SyncAction   from '../src/SyncAction';
+import Store        from '../src/Store';
+import Listener     from '../src/Listener';
 
 
 //var sinon   = require('sinon');
@@ -75,7 +76,7 @@ describe('Creating action', function() {
 
 
     describe("the synchronisity",function(){
-        var syncaction = new Action( true ).asFunction,
+        var syncaction = new SyncAction().asFunction,
             asyncaction = new Action().asFunction,
             synccalled = false,
             asynccalled = false;
