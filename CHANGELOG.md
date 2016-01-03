@@ -6,7 +6,33 @@ Big revamp to support more ES6 syntax, Flow.
 
 Airflux should now be soon Flux compatible.
 
+### Action.asFunction for asynchronous actions
+
+If your action has a completed and failed children, asFunction will now automatically return a Promise, bound to these children.
+Meaning you can actually do:
+
+```javascript
+const action = new Action().asyncResult( () => new Promise( .... ) ).asFunction;
+action().then( () => console.log( 'will be called when your promise is resolved' ) );
+```
+
+
 ## Breaking changes
+
+### ES6 Import
+
+Use ES6 import syntax with airflux:
+
+```javascript
+import * as airflux from 'airflux';
+```
+
+or
+
+```javascript
+import { Action, Store, FluxComponent } from 'airflux';
+```
+
 
 ### FluxComponent
 
@@ -23,11 +49,38 @@ This is especially helpful if your callback makes use of setState.
 
 Set at false, it will be called as soon as the component is created in memory.
 
+```javascript
+import React, { Component } from 'react';
+import { Action, FluxComponent } from 'airflux';
+
+const action = new Action().asFunction;
+
+@FluxComponent
+class YourComponent extends Component {
+    constructor( props ) {
+        super( props );
+        this.listenTo( action, this.actionHandler );
+    }
+
+    actionHandler() {
+
+    }
+}
+```
+
+The key difference here with simple mixins, is that FluxComponent actually modifies the prototype of YourComponent, and not each instance.
+It also preserves any method already declared in your class, such as componentDidMount for instance.
+
 
 ### SyncAction
 
 There is now a separate class for SyncAction.
 I feel like they are not the norm, and are special enough to warrant the new instanciation of an action to be clear.
+
+```javascript
+import { SyncAction } from 'airflux';
+const asyncAction = new SyncAction().asFunction;
+```
 
 ### Joins arguments
 
