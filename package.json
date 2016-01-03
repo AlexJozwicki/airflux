@@ -14,7 +14,8 @@
     "build": "npm run build-cjs && npm run build-es6 && npm run build-umd",
     "build-cjs": "rimraf lib && babel ./src -d lib --ignore '__tests__'",
     "build-es6": "rimraf es6 && cp -R ./src es6",
-    "build-umd": "NODE_ENV=production webpack"
+    "build-umd": "NODE_ENV=production webpack",
+    "test-browser": "karma start"
   },
   "author": "Alexandre Jozwicki",
   "contributors": [
