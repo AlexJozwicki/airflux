@@ -2,6 +2,7 @@ var assert = require('chai').assert,
     fn = function(){};
 
 import Action from '../src/Action';
+import SyncAction from '../src/SyncAction';
 import Store from '../src/Store';
 
 
@@ -10,7 +11,7 @@ describe('Stopping',function(){
         var store = new Store(),
             action1 = new Action().asFunction,
             action2 = new Action().asFunction;
-        store.joinTrailing(action1,action2,function(){});
+        store.joinTrailing( () => 0, action1, action2 );
         it('should fail',function(){
             assert.equal(store.stopListeningTo(action1),false);
             assert.equal(store.subscriptions.length,1);
@@ -18,24 +19,25 @@ describe('Stopping',function(){
     });
     describe('a join',function(){
         var store = new Store(),
-            action1 = new Action( true ).asFunction,
-            action2 = new Action( true ).asFunction,
-            action3 = new Action( true ).asFunction,
+            action1 = new SyncAction().asFunction,
+            action2 = new SyncAction().asFunction,
+            action3 = new SyncAction().asFunction,
             indivcallback = sinon.spy(),
             joincallback = sinon.spy(),
             subobj;
-        store.listenTo(action2,indivcallback);
-        subobj = store.joinLeading(action1,action2,action3,joincallback);
+        store.listenTo( action2, indivcallback );
+        subobj = store.joinLeading( joincallback, action1, action2, action3);
         subobj.stop();
 
-        action1("A");
-        action2("B");
-        action3("C");
+        action1( "A" );
+        action2( "B" );
+        action3( "C" );
+
         it('should leave the individual listening intact',function(){
-            assert.equal(store.subscriptions.length,1);
-            assert.equal(store.subscriptions[0].listenable,action2);
-            action2("foo","bar");
-            assert.deepEqual(["foo","bar"],indivcallback.lastCall.args);
+            assert.equal( store.subscriptions.length, 1 );
+            assert.equal( store.subscriptions[0].listenable, action2 );
+            action2( "foo", "bar" );
+            assert.deepEqual( ["foo","bar"], indivcallback.lastCall.args );
         });
         it('should not fire join callback anymore',function(done){
             setTimeout(function(){

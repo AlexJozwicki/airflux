@@ -1,4 +1,31 @@
-## 0.2.2
+# 0.5.0
+
+Big revamp to support more ES6 syntax, Flow.
+
+## New features
+
+Airflux should now be soon Flux compatible.
+
+## Breaking changes
+
+### SyncAction
+
+There is now a separate class for SyncAction.
+I feel like they are not the norm, and are special enough to warrant the new instanciation of an action to be clear.
+
+### Joins arguments
+
+The arguments order of all joins has been switched to joinx( callback, ...actions ).
+The callback is now the first argument, instead of the last.
+Actions should really have been considered as varargs, as they are right now with the ES6 syntax.
+As a var arg, it should be the last.
+
+### Joins stores
+
+Are now exported under airflux.Joins
+
+
+# 0.2.2
 
 Child action are now created as Action and not functor on the parent action.
 Child actions are added as functors on the functor of the parent action.
@@ -19,7 +46,7 @@ var action/*:Action*/ = new Action().withChildren( [ 'foo', [ 'bar', new Action(
 
 
 
-## 0.2.1
+# 0.2.1
 
 Dropping the in-library support for Promise polyfill.
 Basically the philosphy is that the default working environment should be a browser with everything.
@@ -32,7 +59,7 @@ For this particular instance, you should include this line before loading airflu
 require('es6-promise').polyfill();
 ```
 
-## 0.2.0
+# 0.2.0
 
 new Action doesn't return a functor anymore, but the class itself.
 This was done in order to be able to easily extend it and create actions specific for your application.

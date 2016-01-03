@@ -1,6 +1,7 @@
 var assert  = require('chai').assert;
 
 import Action from '../src/Action';
+import SyncAction from '../src/SyncAction';
 import Store from '../src/Store';
 
 
@@ -109,9 +110,9 @@ describe('using joins',function(){
                 spy;
 
             beforeEach(function () {
-                action1 = new Action( true ).asFunction;
-                action2 = new Action( true ).asFunction;
-                action3 = new Action( true ).asFunction;
+                action1 = new SyncAction().asFunction;
+                action2 = new SyncAction().asFunction;
+                action3 = new SyncAction().asFunction;
                 store = new Store();
                 spy = sinon.spy();
                 store.joinStrict( spy, action1, action2, action3 );
