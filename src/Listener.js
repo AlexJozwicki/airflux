@@ -3,8 +3,13 @@ import * as _ from './utils';
 import Publisher from './Publisher';
 import Join from './Join';
 
-export type Listenable = Action | Store;
-export type SubscriptionObj = { stop: Function; listenable: Listenable | Array< Listenable > };
+import type Action from './Action';
+import type Store from './Store';
+
+export type SubscriptionObj = {
+    stop: Function;
+    listenable: (Publisher | Array< Publisher >);
+};
 
 
 /**
@@ -27,7 +32,7 @@ export default class Listener extends Publisher {
      * @param {Action|Store} listenable The listenable we want to search for
      * @returns {Boolean} The result of a recursive search among `this.subscriptions`
      */
-    hasListener( listenable: Listenable ) {
+    hasListener( listenable: Publisher ) : boolean {
         var subs = this.subscriptions || [];
         for (var i = 0; i < subs.length; ++i) {
             var listenables = [].concat(subs[i].listenable);
@@ -50,14 +55,17 @@ export default class Listener extends Publisher {
      *
      * @param {Object} listenables An object of listenables. Keys will be used as callback method names.
      */
-    listenToMany( listenables: Listenable ) {
-        var allListenables = flattenListenables(listenables);
+    listenToMany( listenables: { [key: string]: Publisher } ) {
+        var allListenables = flattenListenables( listenables );
         for (var key in allListenables) {
             var cbname = _.callbackName(key);
+            // $FlowComputedProperty
             var localname = this[cbname] ? cbname : this[key] ? key : undefined;
             if (localname) {
                 var callback = (
+                    // $FlowComputedProperty
                     this[cbname + 'Default'] ||
+                    // $FlowComputedProperty
                     this[localname + 'Default'] ||
                     localname
                 );
@@ -73,12 +81,12 @@ export default class Listener extends Publisher {
      *  listened to.
      * @returns {String|Undefined} An error message, or undefined if there was no problem.
      */
-    validateListening( listenable: Listenable ) {
+    validateListening( listenable: Publisher ) : ?string {
         if (listenable === this) {
             return 'Listener is not able to listen to itself';
         }
         if (!_.isFunction(listenable.listen)) {
-            return listenable + ' is missing a listen method';
+            return `${listenable} is missing a listen method`;
         }
         if (listenable.hasListener && listenable.hasListener(this)) {
             return 'Listener cannot listen to this listenable because of circular loop';
@@ -94,12 +102,14 @@ export default class Listener extends Publisher {
      * @param {Function|String} defaultCallback The callback to register as default handler
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
-    listenTo( listenable: Listenable, callback: Function | string, defaultCallback: Function | string ) : SubscriptionObj  {
+    listenTo( listenable: Publisher, callback: Function | string, defaultCallback: ?(Function | string) ) : SubscriptionObj  {
         _.throwIf( this.validateListening( listenable ) );
 
-        this.fetchInitialState(listenable, defaultCallback);
+        if( !!defaultCallback )
+            this.fetchInitialState( listenable, defaultCallback );
 
         var subs = this.subscriptions;
+        // $FlowComputedProperty
         var desub = listenable.listen( this[callback] || callback, this );
         var unsubscriber = function () {
             var index = subs.indexOf(subscriptionObj);
@@ -123,7 +133,7 @@ export default class Listener extends Publisher {
      * @param {Action|Store} listenable The action or store we no longer want to listen to
      * @returns {Boolean} True if a subscription was found and removed, otherwise false.
      */
-    stopListeningTo( listenable: Listenable ) : boolean {
+    stopListeningTo( listenable: Publisher ) : boolean {
         var subs = this.subscriptions || [];
 
         // TODO: use lodash array find or something
@@ -177,8 +187,10 @@ export default class Listener extends Publisher {
      * @param {Action|Store} listenable The publisher we want to get initial state from
      * @param {Function|String} defaultCallback The method to receive the data
      */
-    fetchInitialState( listenable: Listenable, defaultCallback: Function | string ) {
+    fetchInitialState( listenable: Publisher, defaultCallback: Function | string ) {
+        //const callback: Function = typeof defaultCallback === 'string' ? this[defaultCallback] : defaultCallback;
         if (typeof defaultCallback === 'string') {
+            // $FlowComputedProperty
             defaultCallback = this[defaultCallback];
         }
 
@@ -201,7 +213,7 @@ export default class Listener extends Publisher {
      * @param {Function} callback The method to call when all publishers have emitted
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
      */
-    joinTrailing( callback: Function, ...listenables ) {
+    joinTrailing( callback: Function, ...listenables: Array< Publisher > ) : SubscriptionObj {
         return this._createJoin( 'last', callback, listenables );
     }
 
@@ -213,7 +225,7 @@ export default class Listener extends Publisher {
      * @param {Function|String} callback The method to call when all publishers have emitted
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
      */
-    joinLeading( callback: Function, ...listenables ) {
+    joinLeading( callback: Function, ...listenables: Array< Publisher > ) : SubscriptionObj {
         return this._createJoin( 'first', callback, listenables );
     }
 
@@ -224,7 +236,7 @@ export default class Listener extends Publisher {
      * @param {Function|String} callback The method to call when all publishers have emitted
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
      */
-    joinConcat( callback: Function, ...listenables ) {
+    joinConcat( callback: Function, ...listenables: Array< Publisher > ) : SubscriptionObj {
         return this._createJoin( 'all', callback, listenables );
     }
 
@@ -236,12 +248,12 @@ export default class Listener extends Publisher {
      * @param {Function|String} callback The method to call when all publishers have emitted
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
      */
-    joinStrict( callback: Function, ...listenables ) {
+    joinStrict( callback: Function, ...listenables: Array< Publisher > ) : SubscriptionObj {
         return this._createJoin( 'strict', callback, listenables );
     }
 
 
-    _createJoin( strategy: string, callback: Function, listenables: Array< Listenable > ) : SubscriptionObj {
+    _createJoin( strategy: string, callback: Function, listenables: Array< Publisher > ) : SubscriptionObj {
         _.throwIf( listenables.length < 2, 'Cannot create a join with less than 2 listenables!' );
 
         // validate everything
@@ -249,10 +261,12 @@ export default class Listener extends Publisher {
 
         const stop: Function = new Join( listenables, strategy ).listen( callback );
 
-        var subobj = { listenable: listenables };
-        subobj.stop = () => {
-            stop();
-            this.removeSubscription( subobj );
+        var subobj : SubscriptionObj = {
+            listenable  : listenables,
+            stop: () => {
+                stop();
+                this.removeSubscription( subobj );
+            }
         };
 
         this.subscriptions.push( subobj );
@@ -270,7 +284,7 @@ export default class Listener extends Publisher {
  *
  * @param {Object} listenable The parent listenable
  */
-var mapChildListenables = function( listenable/*:Action|Store*/ ) {
+var mapChildListenables = function( listenable: Publisher ) {
     var children = {};
 
     var childListenables = listenable.children || [];
@@ -290,10 +304,10 @@ var mapChildListenables = function( listenable/*:Action|Store*/ ) {
  *
  * @param {Object} listenables The top-level listenables
  */
-var flattenListenables = function( listenables/*:Action|Store*/ ) {
+var flattenListenables = function( listenables : { [key: string]: Publisher } ) {
     var flattened = {};
     for (var key in listenables) {
-        var listenable = listenables[key];
+        var listenable: Publisher = listenables[key];
         var childMap = mapChildListenables(listenable);
 
         // recursively flatten children

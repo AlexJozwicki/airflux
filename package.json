@@ -2,12 +2,19 @@
   "name": "airflux",
   "version": "0.5.0-beta1",
   "description": "A pure ES6 fork of the Reflux data flow library similar to Facebook Flux",
-  "main": "src",
+  "files": [
+    "*.md",
+    "es6",
+    "lib",
+    "commonjs2"
+  ],
+  "main": "lib/index",
+  "jsnext:main": "es6/index",
   "scripts": {
-    "test": "grunt test",
-    "benchmark": "node test/benchmarks",
-    "build": "grunt build",
-    "build-npm": "rm -rf build/npm && babel -d build/npm/lib ./src && cp README.md build/npm && find -X build/npm/lib -type d -name __tests__ | xargs rm -rf && node -p 'p=require(\"./package\");p.main=\"lib\";p.scripts=p.devDependencies=undefined;JSON.stringify(p,null,2)' > build/npm/package.json"
+    "build": "npm run build-cjs && npm run build-es6 && npm run build-umd",
+    "build-cjs": "rimraf lib && babel ./src -d lib --ignore '__tests__'",
+    "build-es6": "rimraf es6 && cp -R ./src es6",
+    "build-umd": "NODE_ENV=production webpack"
   },
   "author": "Alexandre Jozwicki",
   "contributors": [
@@ -30,6 +37,7 @@
     "eventemitter3": "^1.1.1"
   },
   "devDependencies": {
+    "rimraf": "^2.4.3",
     "babel-core": "^6.2.1",
     "babel-loader": "^6.2.0",
     "babel-plugin-syntax-class-properties": "^6.3.13",

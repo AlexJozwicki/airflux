@@ -1,15 +1,18 @@
+/* @flow */
 var slice = Array.prototype.slice;
+import type Publisher from './Publisher';
+
 
 export default class Join {
     _strategy           : string;
     _args               : Array< any > = [];
     _listenablesEmitted : Array< boolean > = [];
     _callback           : Function;
-    _listenables        : Array< Listenable >;
+    _listenables        : Array< Publisher >;
 
 
 
-    constructor( listenables: Array< Listenable >, strategy: string ) {
+    constructor( listenables: Array< Publisher >, strategy: string ) {
         this._listenables = listenables;
         this._strategy = strategy;
         this._reset();
@@ -29,7 +32,7 @@ export default class Join {
         return () => cancels.forEach( ( cancel ) => cancel() );
     }
 
-    _newListener( i ) {
+    _newListener( i: number ) : Function {
         return function() {
             var callargs = slice.call( arguments );
             if( this._listenablesEmitted[ i ] ) {

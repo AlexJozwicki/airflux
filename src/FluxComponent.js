@@ -1,53 +1,56 @@
 /* @flow */
 import Listener from './Listener';
-import type { Listenable } from './Listener';
+import type Publisher from './Publisher';
+
 
 type ListenToDefinition = {
-    listenable  : Listenable;
-    callback    : Function | string;
+    listenable  : Publisher;
+    callback    : Function | string;
 };
 
 
-export default function FluxComponent( target: ReactComponent ) {
+export default function FluxComponent( target ) {
     var clazz = target.prototype;
     var listener = new Listener();
 
     // pending listenables to be activated upon mounting
-    var mountedListenables : Array< ListenToDefinition > = [];
+    var mountedListenables : Array< ListenToDefinition > = [];
 
-    const orgComponentDidMount = target.componentDidMount;
+    const orgComponentDidMount = clazz.componentDidMount;
     clazz.componentDidMount = function() {
         if( !!orgComponentDidMount ) orgComponentDidMount.call( this );
 
         mountedListenables.forEach( ( pl ) => listener.listenTo( pl.listenable, pl.callback ) );
     };
 
-    const orgComponentWillMount = target.componentWillMount;
+    const orgComponentWillMount = clazz.componentWillMount;
     clazz.componentWillMount = function() {
         if( !!orgComponentWillMount ) orgComponentWillMount.call( this );
     };
 
-    const orgComponentWillUnmount = target.componentWillUnmount;
+    const orgComponentWillUnmount = clazz.componentWillUnmount;
     clazz.componentWillUnmount = function() {
         listener.stopListeningToAll();
         if( !!orgComponentWillUnmount ) orgComponentWillUnmount.call( this );
     };
 
-    clazz.listenTo = function( listenable: Listenable, callback: Function | string, afterMounting: boolean = true ) {
+    clazz.listenTo = function( listenable: Publisher, callback: Function | string, afterMounting: boolean = true ) {
         if( afterMounting ) {
             mountedListenables.push( { listenable, callback } );
         }
         else {
             if( typeof callback === 'function' ) {
                 listener.listenTo( listenable, function() {
+                    // $FlowDynamicTypeCheckBug
                     callback.apply( this, arguments );
                 } );
             }
-            else if( !!listenable.state ) {
+            else if( typeof callback === 'string' && !!listenable.state ) {
                 this.state = this.state || {};
                 this.state[ callback ] = listenable.state;
 
-                listener.listenTo( listenable, ( value ) => this.setState( { [key]: value } ) );
+                // $FlowDynamicTypeCheckBug
+                listener.listenTo( listenable, ( value ) => this.setState( { [callback]: value } ) );
             }
         }
     };

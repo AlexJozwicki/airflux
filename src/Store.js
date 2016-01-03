@@ -1,7 +1,7 @@
 /* @flow */
 import Listener from './Listener';
 
-export type StateMutation = ( x: State ) => State;
+export type StateMutation< State > = ( x: State ) => State;
 
 /**
  */
@@ -21,7 +21,7 @@ export default class Store< State > extends Listener {
      * Publishes the state to all subscribers.
      * This ensures that the stores always publishes the same data/signature.
      */
-    publishState( transform: ?StateMutation = null ) {
+    publishState( transform: ?StateMutation< State > = null ) {
         if( !!transform ) {
             this._state = transform( this._state );
         }

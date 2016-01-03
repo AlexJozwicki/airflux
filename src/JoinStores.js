@@ -6,6 +6,7 @@ function joinClassFactory( strategy: string, ...listenables ) : Store {
     var store = new Store();
 
     // TODO: when flow supports :: syntax, switch to it
+    // $FlowComputedProperty
     store[ strategy ]( store.trigger.bind( store ), ...listenables );
     return store;
 }

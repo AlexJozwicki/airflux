@@ -1,17 +1,23 @@
 /* @flow */
 import Publisher from './Publisher';
-import type { Functor } from './Publisher';
 
+export type Functor = Function;
 
+type Children = { [key: string]: Action };
 
 /**
  * @abstract
  */
 export default class Action extends Publisher {
-    constructor( sync: boolean = false ) {
+    children: Children;
+
+
+    constructor() {
         super();
         this.children = {};
     }
+
+    get sync() : boolean { return false; }
 
 
     /**
@@ -22,7 +28,7 @@ export default class Action extends Publisher {
      *
      * If the listen function returns a Promise, the Promise will be automatically mapped onto these two children actions.
      */
-    asyncResult( listenFunction: ?Function = void 0 ) {
+    asyncResult( listenFunction: ?Function = void 0 ) : Action {
         this.children.completed = new Action();
         Object.defineProperty( this, 'completed', { value: this.children.completed } );
 
@@ -40,7 +46,7 @@ export default class Action extends Publisher {
     /**
      * Creates children actions
      */
-    withChildren( children ) {
+    withChildren( children: Array< Children | string > ) : Action {
         children.forEach( ( child ) => {
             if( typeof child === 'string' ) {
                 let action = new Action();

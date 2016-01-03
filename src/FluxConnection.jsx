@@ -3,7 +3,7 @@ import Flux from './Flux';
 import type { Listenable } from './Listenable';
 
 
-type FluxConnectionProps = {
+type FluxConnectionProps = {
     stores: { [ key: string ]: Listenable };
 };
 

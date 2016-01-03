@@ -2,21 +2,24 @@
 import * as _ from './utils';
 
 
+
 /**
  * @constructor
  */
 export default class Publisher {
     emitter            : any;
-    children           : Array< any >;
+    //children           : Array< any >;
     _dispatchPromises  : Array< any >;
 
+    completed           : Function;
+    failed              : Function;
 
     /**
      * @protected
      */
     constructor() {
         this.emitter = new _.EventEmitter();
-        this.children = [];
+        //this.children = [];
         this._dispatchPromises = [];
     }
 
@@ -51,11 +54,11 @@ export default class Publisher {
      * @param {Mixed} [optional] bindContext The context to bind the callback with
      * @returns {Function} Callback that unsubscribes the registered event handler
      */
-    listen( callback: Function, bindContext ) : ?Function {
+    listen( callback: Function, bindContext: any ) : Function {
         var aborted = false;
         bindContext = bindContext || this;
 
-        var eventHandler = ( args ) => {
+        var eventHandler = ( args ) => {
             if( aborted ) {
                 // This state is achieved when one listener removes another.
                 //   It might be considered a bug of EventEmitter2 which makes
@@ -93,7 +96,7 @@ export default class Publisher {
     }
 
 
-    listenOnce( callback: Function, bindContext ) : Function {
+    listenOnce( callback: Function, bindContext: any ) : Function {
         bindContext = bindContext || this;
         var unsubscribe = this.listen( () => {
             var args = Array.prototype.slice.call(arguments);
@@ -109,7 +112,7 @@ export default class Publisher {
      *
      * @param {Object} The promise to attach to
      */
-    promise( promise: Promise ) {
+/*    promise( promise: Promise ) {
         var canHandlePromise : boolean =
             this.children.indexOf('completed') >= 0 &&
             this.children.indexOf('failed') >= 0;
@@ -120,7 +123,7 @@ export default class Publisher {
 
         promise.then( ( response ) => this.completed.asFunction( response ) )
                .catch( ( error ) => this.failed.asFunction( error ) );
-    }
+    }*/
 
     /**
      * Attach handlers to promise that trigger the completed and failed
@@ -141,11 +144,11 @@ export default class Publisher {
             return;
         }
 
-        promise.then( ( response ) => this.completed.asFunction( response ), ( error ) => this.failed.asFunction( error ) );
+        return promise.then( ( response ) => this.completed.asFunction( response ), ( error ) => this.failed.asFunction( error ) );
     }
 
 
-    reject( result ) {
+    reject( result: any ) {
         if( _.isPromise( result ) ) {
             console.warn('Use #resolve() for promises.');
             return;
@@ -155,7 +158,7 @@ export default class Publisher {
     }
 
 
-    then( onSuccess, onFailure ) {
+    then( onSuccess: ?Function, onFailure: ?Function ) {
         const canHandlePromise : boolean = this.canHandlePromise();
         if (!canHandlePromise) {
             throw new Error('Not an async publisher');
@@ -170,13 +173,13 @@ export default class Publisher {
     }
 
 
-    catch( onFailure ) {
+    catch( onFailure: Function ) {
         this.then(null, onFailure);
     }
 
 
     canHandlePromise() : boolean {
-        return this.completed && this.failed;// && this.completed._isActionFunctor && this.failed._isActionFunctor;
+        return !!this.completed && !!this.failed;// && this.completed._isActionFunctor && this.failed._isActionFunctor;
     }
 
     /**
@@ -200,7 +203,7 @@ export default class Publisher {
     /**
      * Tries to publish the event on the next tick
      */
-    trigger() : Functor {
+    trigger() {
         const args = arguments;
         _.nextTick( () => this.triggerSync.apply( this, args ) );
     }
@@ -208,7 +211,7 @@ export default class Publisher {
     /**
      * Returns a Promise for the triggered action
      */
-    triggerPromise() {
+    triggerPromise() : Promise {
         const canHandlePromise = this.canHandlePromise();
         if (!canHandlePromise) {
             throw new Error('Publisher must have "completed" and "failed" child publishers');
@@ -238,7 +241,7 @@ export default class Publisher {
     /**
      * @private
      */
-    _handleDispatchPromises() {
+    _handleDispatchPromises() : ?Promise {
         var promises = this._dispatchPromises;
         this._dispatchPromises = [];
 

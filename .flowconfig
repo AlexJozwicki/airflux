@@ -1,0 +1,29 @@
+[ignore]
+./es6/.*
+./lib/.*
+.*/react/node_modules/.*
+.*/node_modules/fbjs/*
+.*/node_modules/babel.*
+.*/node_modules/babylon.*
+
+[include]
+./src
+
+[libs]
+
+[options]
+module.system=node
+strip_root=true
+munge_underscores=true
+unsafe.enable_getters_and_setters=true
+esproposal.decorators=ignore
+esproposal.class_static_fields=ignore
+esproposal.class_instance_fields=ignore
+
+suppress_comment= \\(.\\|\n\\)*\\$IgnoreFlow
+suppress_comment= \\(.\\|\n\\)*\\$FlowPrototypeDecl
+suppress_comment= \\(.\\|\n\\)*\\$FlowComputedProperty
+suppress_comment= \\(.\\|\n\\)*\\$FlowDynamicTypeCheckBug
+
+[version]
+0.20.1

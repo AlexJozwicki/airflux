@@ -1,10 +1,10 @@
 module.exports = {
     entry: [ './src/index.js' ], // karma will set this
     output: {
-        path: './build',
-        filename: 'airflux.js',
+        path: './commonjs2',
+        filename: 'index.js',
         library: 'airflux',
-        libraryTarget: 'umd'
+        libraryTarget: 'commonjs2'
     },
     resolve: {
     },
