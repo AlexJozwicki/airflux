@@ -1,6 +1,6 @@
 var chai    = require('chai');
 var assert  = chai.assert;
-var _       = require('../src/utils');
+import * as _ from '../src/utils';
 
 
 describe("the utils object",function(){

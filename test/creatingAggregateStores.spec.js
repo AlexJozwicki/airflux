@@ -1,6 +1,9 @@
 var chai = require('chai'),
-    assert = chai.assert,
-    airflux = require('../src');
+    assert = chai.assert;
+
+import Action from '../src/Action';
+import Store from '../src/Store';
+
 
 chai.use(require('chai-as-promised'));
 
@@ -16,15 +19,15 @@ describe('Creating aggregate stores', function() {
 
         beforeEach(function() {
             promise = new Promise(function(resolve) {
-                action = new airflux.SimpleAction();
-                store = new class extends airflux.Store {
+                action = new Action().asFunction;
+                store = new class extends Store {
                     constructor() {
                         super();
                         this.listenTo(action, this.triggerSync);
                         // pass to the triggerSync function immediately
                     }
                 }();
-                aggregateStore = new class extends airflux.Store {
+                aggregateStore = new class extends Store {
                     constructor() {
                         super();
                         this.listenTo(store, this.storeCalled);
@@ -58,7 +61,7 @@ describe('Creating aggregate stores', function() {
             var thirdStore;
 
             beforeEach(function() {
-                thirdStore = new airflux.Store();
+                thirdStore = new Store();
                 thirdStore.listenTo(aggregateStore, function() {});
             });
 

@@ -1,4 +1,5 @@
-var airflux = require('../src');
+import * as airflux from '../src';
+
 
 // Creating an Action
 var textUpdate = airflux.createAction();

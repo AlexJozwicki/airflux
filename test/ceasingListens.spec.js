@@ -1,15 +1,15 @@
 var assert = require('chai').assert,
-    airflux = require('../src'),
-    Action = airflux.SimpleAction,
-    Store = airflux.Store,
-    fn = function(){},
-    sinon = require('sinon');
+    fn = function(){};
+
+import Action from '../src/Action';
+import Store from '../src/Store';
+
 
 describe('Stopping',function(){
     describe('listening to a publisher that\'s only part of a join',function(){
         var store = new Store(),
-            action1 = new Action(),
-            action2 = new Action();
+            action1 = new Action().asFunction,
+            action2 = new Action().asFunction;
         store.joinTrailing(action1,action2,function(){});
         it('should fail',function(){
             assert.equal(store.stopListeningTo(action1),false);
@@ -18,9 +18,9 @@ describe('Stopping',function(){
     });
     describe('a join',function(){
         var store = new Store(),
-            action1 = new Action( true ),
-            action2 = new Action( true ),
-            action3 = new Action( true ),
+            action1 = new Action( true ).asFunction,
+            action2 = new Action( true ).asFunction,
+            action3 = new Action( true ).asFunction,
             indivcallback = sinon.spy(),
             joincallback = sinon.spy(),
             subobj;
@@ -48,8 +48,8 @@ describe('Stopping',function(){
         describe('by calling stop directly',function(){
             describe('when all is well',function(){
                 var store = new Store(),
-                    action1 = new Action(),
-                    action3 = new Action();
+                    action1 = new Action().asFunction,
+                    action3 = new Action().asFunction;
                 store.listenTo(action1,fn);
                 store.listenTo(new Action(),fn);
                 store.listenTo(action3,fn);
@@ -62,8 +62,8 @@ describe('Stopping',function(){
             });
             describe('when the listener has already been removed from the list somehow',function(){
                 var store = new Store();
-                store.listenTo(new Action(),fn);
-                store.listenTo(new Action(),fn);
+                store.listenTo(new Action().asFunction,fn);
+                store.listenTo(new Action().asFunction,fn);
                 it('should throw an error',function(){
                     assert.throws(function(){
                         store.subscriptions.pop().stop();
@@ -74,9 +74,9 @@ describe('Stopping',function(){
         describe('by using stopListenTo',function(){
             describe('when all is well',function(){
                 var store = new Store(),
-                    action1 = new Action(),
-                    action2 = new Action(),
-                    action3 = new Action();
+                    action1 = new Action().asFunction,
+                    action2 = new Action().asFunction,
+                    action3 = new Action().asFunction;
                 store.listenTo(action1,fn);
                 store.listenTo(action2,fn);
                 store.listenTo(action3,fn);
@@ -92,7 +92,7 @@ describe('Stopping',function(){
             });
             describe('when the stop method won\'t remove it from the array',function(){
                 var store = new Store(),
-                    action = new Action();
+                    action = new Action().asFunction;
                 store.listenTo(action,fn);
                 store.subscriptions[0].stop = fn;
                 it('should throw an error',function(){
@@ -102,13 +102,13 @@ describe('Stopping',function(){
                 });
             });
             describe('when we weren\'t actually listening to the given listenable',function(){
-                var action1 = new Action(),
-                    action2 = new Action(),
+                var action1 = new Action().asFunction,
+                    action2 = new Action().asFunction,
                     store = new Store(),
                     result;
                 store.listenTo(action1);
                 store.listenTo(action2);
-                result = new Store().stopListeningTo(new Action());
+                result = new Store().stopListeningTo(new Action().asFunction);
                 it('should return false',function(){
                     assert.equal(false,result);
                 });
@@ -131,8 +131,8 @@ describe('Stopping',function(){
     describe('all listens',function(){
         describe('when all is well',function(){
             var store = new Store();
-            store.listenTo(new Action(),fn);
-            store.listenTo(new Action(),fn);
+            store.listenTo(new Action().asFunction,fn);
+            store.listenTo(new Action().asFunction,fn);
             it('should clear the subscriptions list',function(){
                 store.stopListeningToAll();
                 assert.deepEqual([],store.subscriptions);
@@ -140,7 +140,7 @@ describe('Stopping',function(){
         });
         describe('when a stop fails to remove the subscription object from the list',function(){
             var store = new Store();
-            store.listenTo(new Action());
+            store.listenTo(new Action().asFunction);
             store.subscriptions[0].stop = fn;
             it('should throw an error',function(){
                 assert.throws(function(){

@@ -20,7 +20,7 @@ var JoinTrailingStore   = joinClassFactory( 'joinTrailing' );
 var JoinConcatStore     = joinClassFactory( 'joinConcat' );
 
 
-export function JoinStrict() { return new JoinStrictStore( ...arguments );
-export function JoinLeading() { return new JoinLeadingStore( ...arguments ); },
-export function JoinTrailing() { return new JoinTrailingStore( ...arguments ); },
-export function JoinConcat() { return new JoinConcatStore( ...arguments ); }
+export function joinStrict() { return new JoinStrictStore( ...arguments ) };
+export function joinLeading() { return new JoinLeadingStore( ...arguments ); };
+export function joinTrailing() { return new JoinTrailingStore( ...arguments ); };
+export function joinConcat() { return new JoinConcatStore( ...arguments ); };

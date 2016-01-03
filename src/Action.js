@@ -78,7 +78,7 @@ export default class Action extends Publisher {
      *
      */
     _createFunctor( sync: boolean = false ) : Functor {
-        const trigger = sync ? this.triggerSync : this.triggerPromise;
+        const trigger = sync ? this.triggerSync : this.trigger;
         var functor = trigger.bind( this );
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );

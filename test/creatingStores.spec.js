@@ -1,7 +1,9 @@
 var chai = require('chai'),
-    assert = chai.assert,
-    airflux = require('../src'),
-    sinon = require('sinon');
+    assert = chai.assert;
+
+import Action from '../src/Action';
+import Store from '../src/Store';
+
 
 chai.use(require('chai-as-promised'));
 
@@ -14,11 +16,11 @@ describe('Creating stores', function() {
             unsubCallback;
 
         beforeEach(function() {
-            airflux.StoreMethods = {};
+            StoreMethods = {};
 
             promise = new Promise(function(resolve) {
-                action = new airflux.SimpleAction();
-                class AnonStore extends airflux.Store {
+                action = new Action().asFunction;
+                class AnonStore extends Store {
                     constructor() {
                         super();
                         unsubCallback = this.listenTo(action, this.actionCalled);
@@ -83,7 +85,7 @@ describe('Creating stores', function() {
         });
 
         it('should be able to reuse action again further down the chain', function() {
-            new class extends airflux.Store {
+            new class extends Store {
                 constructor() {
                     super();
 
@@ -141,8 +143,8 @@ describe('Creating stores', function() {
             baseStore;
 
         beforeEach(function () {
-            action = new airflux.SimpleAction();
-            baseStore = class extends airflux.Store {
+            action = new Action().asFunction;
+            baseStore = class extends Store {
                 constructor() {
                     super();
                     this.listenTo(action, this.actionCalled);
@@ -164,7 +166,7 @@ describe('Creating stores', function() {
                     this.trigger(args);
                     resolve(args);
                 };
-                class _cl extends airflux.Store {
+                class _cl extends Store {
                     constructor() {
                         super();
                         this.listenTo(store, this.storeTriggered, storeTriggered);
@@ -237,7 +239,7 @@ describe('Creating stores', function() {
                 Object.defineProperty( listenables.bar, 'state', { get: barState } );
                 Object.defineProperty( listenables.baz, 'state', { get: bazState } );
 
-                class _cl extends airflux.Store {
+                class _cl extends Store {
                     constructor() {
                         super();
                         this.listenToMany( listenables );
@@ -278,7 +280,7 @@ describe('Creating stores', function() {
     describe('getters', function() {
         var didRun = false;
 
-        new class extends airflux.Store {
+        new class extends Store {
             get dontRunMe() {
                 didRun = true;
             }

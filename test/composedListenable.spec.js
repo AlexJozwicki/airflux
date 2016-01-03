@@ -1,6 +1,12 @@
 var chai = require('chai'),
-    assert = chai.assert,
-    airflux = require('../src');
+    assert = chai.assert;
+
+import * as airflux from '../src';
+
+import Action from '../src/Action';
+import Store from '../src/Store';
+
+
 
 chai.use(require('chai-as-promised'));
 
@@ -11,9 +17,9 @@ describe('Composed listenables', function() {
         all;
 
     beforeEach(function() {
-        action1 = new airflux.SimpleAction();
-        action2 = new airflux.SimpleAction();
-        action3 = new airflux.SimpleAction();
+        action1 = new Action().asFunction;
+        action2 = new Action().asFunction;
+        action3 = new Action().asFunction;
         all = airflux.all(action1, action2, action3);
     });
 

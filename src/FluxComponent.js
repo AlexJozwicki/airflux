@@ -1,4 +1,5 @@
-import type { Listenable } from './Listenable';
+/* @flow */
+//import type { Listenable } from './Listenable';
 
 type ListenToDefinition = {
     listenable  : Listenable;
@@ -6,7 +7,7 @@ type ListenToDefinition = {
 };
 
 
-export function( target: ReactComponent ) {
+export default function FluxComponent( target: ReactComponent ) {
     var clazz = target.prototype;
     var listener = new Listener();
 

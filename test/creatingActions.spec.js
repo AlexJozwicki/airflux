@@ -1,16 +1,22 @@
 var chai    = require('chai');
 var assert  = chai.assert;
-var airflux = require('../src');
-var sinon   = require('sinon');
+
+
+import Action from '../src/Action';
+import Store from '../src/Store';
+import Listener from '../src/Listener';
+
+
+//var sinon   = require('sinon');
 
 chai.use(require('chai-as-promised'));
 
 describe('Creating action', function() {
     it("should create specified child actions",function(){
-        var action = new airflux.Action().withChildren( ["foo","BAR"] );
+        var action = new Action().withChildren( ["foo","BAR"] );
 
-        assert.instanceOf( action.foo, airflux.Action );
-        assert.instanceOf( action.BAR, airflux.Action );
+        assert.instanceOf( action.foo, Action );
+        assert.instanceOf( action.BAR, Action );
         assert.isFunction( action.foo.listen );
         assert.isFunction( action.BAR.listen );
 
@@ -18,18 +24,18 @@ describe('Creating action', function() {
     });
 
     it("should create specified custom child actions",function(){
-        var barAction = new airflux.Action( true );
-        var action = new airflux.Action().withChildren( [ [ 'BAR', barAction ] ] );
+        var barAction = new Action( true );
+        var action = new Action().withChildren( [ [ 'BAR', barAction ] ] );
 
-        assert.instanceOf( action.BAR, airflux.Action );
+        assert.instanceOf( action.BAR, Action );
         assert.equal( action.children.BAR, barAction );
     });
 
     it("should create completed and failed child actions for async actions",function(){
-        var action = new airflux.Action().asyncResult();
+        var action = new Action().asyncResult();
 
-        assert.instanceOf( action.completed, airflux.Action);
-        assert.instanceOf( action.failed, airflux.Action );
+        assert.instanceOf( action.completed, Action);
+        assert.instanceOf( action.failed, Action );
         assert.isFunction( action.completed.listen );
         assert.isFunction( action.failed.listen );
 
@@ -42,14 +48,14 @@ describe('Creating action', function() {
 
 
     it("should add completed and failed child functors on the functor of async actions",function(){
-        var functor = new airflux.Action().asyncResult().asFunction;
+        var functor = new Action().asyncResult().asFunction;
 
         assert.isFunction( functor.completed );
         assert.isFunction( functor.failed );
         assert.equal( functor.completed._isActionFunctor, true );
         assert.equal( functor.failed._isActionFunctor, true );
-        assert.instanceOf( functor.completed.action, airflux.Action);
-        assert.instanceOf( functor.failed.action, airflux.Action );
+        assert.instanceOf( functor.completed.action, Action);
+        assert.instanceOf( functor.failed.action, Action );
         assert.isFunction( functor.completed.listen );
         assert.isFunction( functor.failed.listen );
     });
@@ -58,7 +64,7 @@ describe('Creating action', function() {
         testArgs;
 
     beforeEach(function () {
-        action = new airflux.SimpleAction();
+        action = new Action().asFunction;
         testArgs = [1337, 'test'];
     });
 
@@ -69,12 +75,12 @@ describe('Creating action', function() {
 
 
     describe("the synchronisity",function(){
-        var syncaction = new airflux.SimpleAction( true ),
-            asyncaction = new airflux.SimpleAction(),
+        var syncaction = new Action( true ).asFunction,
+            asyncaction = new Action().asFunction,
             synccalled = false,
             asynccalled = false;
 
-        var store = new class extends airflux.Store {
+        var store = new class extends Store {
             constructor() {
                 super();
                 this.listenTo( syncaction, this.sync );
@@ -100,12 +106,12 @@ describe('Creating action', function() {
 
 
     describe("the synchronisity using Action with asFunction",function(){
-        var syncaction = new airflux.Action().asSyncFunction,
-            asyncaction = new airflux.Action().asFunction,
+        var syncaction = new Action().asSyncFunction,
+            asyncaction = new Action().asFunction,
             synccalled = false,
             asynccalled = false;
 
-        var store = new class extends airflux.Store {
+        var store = new class extends Store {
             constructor() {
                 super();
                 this.listenTo( syncaction, this.sync );
@@ -148,7 +154,7 @@ describe('Creating action', function() {
         });
 
         describe('when adding preEmit hook', function() {
-            var action = new airflux.Action();
+            var action = new Action();
             action.preEmit = sinon.spy();
 
             action.asFunction(1337,'test');
@@ -161,12 +167,12 @@ describe('Creating action', function() {
         describe('when adding shouldEmit hook',function(){
             describe("when hook returns true",function(){
                 var shouldEmit = sinon.stub().returns(true),
-                    action = new airflux.Action(),
+                    action = new Action(),
                     callback = sinon.spy();
 
                 action.shouldEmit = shouldEmit;
 
-                var listener = new airflux.Listener();
+                var listener = new Listener();
                 listener.listenTo( action, callback );
 
                 action.trigger( 1337,'test' );
@@ -184,11 +190,11 @@ describe('Creating action', function() {
 
             describe("when hook returns false",function(){
                 var shouldEmit = sinon.stub().returns(false),
-                    action = new airflux.Action(),
+                    action = new Action(),
                     callback = sinon.spy();
                 action.shouldEmit = shouldEmit;
 
-                var listener = new airflux.Listener();
+                var listener = new Listener();
                 listener.listenTo( action, callback );
                 action.trigger( 1337, 'test' );
 
@@ -210,8 +216,8 @@ describe('Creating actions with children to an action definition object', functi
 
     beforeEach(function () {
         actions = {
-            foo: new airflux.Action().asyncResult(),
-            bar: new airflux.Action().withChildren( ['baz'] )
+            foo: new Action().asyncResult(),
+            bar: new Action().withChildren( ['baz'] )
         };
     });
 
@@ -221,8 +227,8 @@ describe('Creating actions with children to an action definition object', functi
     });
 
     it('should contain Action on foo and bar properties with children', function() {
-        assert.instanceOf( actions.foo, airflux.Action );
-        assert.instanceOf( actions.bar, airflux.Action );
+        assert.instanceOf( actions.foo, Action );
+        assert.instanceOf( actions.bar, Action );
     });
 
     it('should contain Action functor on foo and bar children', function() {
@@ -238,9 +244,9 @@ describe('Creating actions with children to an action definition object', functi
         assert.isFunction( actions.foo.failed.listen );
         assert.isFunction( actions.bar.baz.listen );
 
-        assert.instanceOf( actions.foo.completed, airflux.Action);
-        assert.instanceOf( actions.foo.failed, airflux.Action);
-        assert.instanceOf( actions.bar.baz, airflux.Action);
+        assert.instanceOf( actions.foo.completed, Action);
+        assert.instanceOf( actions.foo.failed, Action);
+        assert.instanceOf( actions.bar.baz, Action);
     });
 
     describe('when listening to the child action created this way', function() {
@@ -302,8 +308,8 @@ describe('Creating multiple actions to an action definition object', function() 
 
     beforeEach(function () {
         actions = {
-            foo: new airflux.SimpleAction(),
-            bar: new airflux.SimpleAction()
+            foo: new Action().asFunction,
+            bar: new Action().asFunction
         };
     });
 
@@ -313,8 +319,8 @@ describe('Creating multiple actions to an action definition object', function() 
     });
 
     it('functors shoudl have the original action as property', function() {
-        assert.instanceOf(actions.foo.action, airflux.Action);
-        assert.instanceOf(actions.bar.action, airflux.Action);
+        assert.instanceOf(actions.foo.action, Action);
+        assert.instanceOf(actions.bar.action, Action);
     });
 
     describe('when listening to any of the actions created this way', function() {
