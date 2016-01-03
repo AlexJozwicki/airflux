@@ -232,7 +232,7 @@ export default class Publisher {
                 reject( args );
             });
 
-            self.trigger.apply( this, args );
+            this.trigger.apply( this, args );
         });
 
         return promise;
