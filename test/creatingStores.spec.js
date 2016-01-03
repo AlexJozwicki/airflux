@@ -7,18 +7,17 @@ import Store from '../src/Store';
 
 chai.use(require('chai-as-promised'));
 
-describe('Creating stores', function() {
-
-    describe('with one store listening to a simple action', function() {
+describe('Creating stores', () => {
+    describe('with one store listening to a simple action', () => {
         var action,
             store,
             promise,
             unsubCallback;
 
-        beforeEach(function() {
-            StoreMethods = {};
+        beforeEach( () => {
+            var StoreMethods = {};
 
-            promise = new Promise(function(resolve) {
+            promise = new Promise( ( resolve ) => {
                 action = new Action().asFunction;
                 class AnonStore extends Store {
                     constructor() {
@@ -37,54 +36,44 @@ describe('Creating stores', function() {
             });
         });
 
-        it('should get argument given on action', function() {
-            action('my argument');
-
-            return assert.eventually.equal(promise, 'my argument');
+        it('should get argument given on action', () => {
+            action( 'my argument' );
+            return assert.eventually.equal( promise, 'my argument' );
         });
 
-        it('should get any arbitrary arguments given on action', function() {
-            action(1337, 'ninja');
-
-            return assert.eventually.deepEqual(promise, [1337, 'ninja']);
+        it('should get any arbitrary arguments given on action', () => {
+            action( 1337, 'ninja' );
+            return assert.eventually.deepEqual( promise, [1337, 'ninja'] );
         });
 
-        it('should throw an error when it listens on itself', function() {
-            assert.throws(function() {
-                store.listenTo(store, function() {});
-            }, Error);
+        it( 'should throw an error when it listens on itself', () => {
+            assert.throws( () => store.listenTo( store, () => 0 ), Error );
         });
 
-        describe('and with listener unsubscribed', function() {
+        describe( 'and with listener unsubscribed', () => {
+            beforeEach( () =>unsubCallback.stop() );
 
-            beforeEach(function() {
-                unsubCallback.stop();
-            });
-
-            it('shouldn\'t have been called when action is called', function(done) {
+            it( 'shouldn\'t have been called when action is called', ( done ) => {
                 var resolved = false;
-                promise.then(function() {
-                    resolved = true;
-                });
+                promise.then( () => resolved = true );
 
-                action(1337, 'ninja');
+                action( 1337, 'ninja' );
 
-                setTimeout(function() {
+                setTimeout( () => {
                   assert.isFalse(resolved);
                   done();
-                }, 20);
+                }, 20 );
             });
 
-            it('can listenTo the same action again', function() {
-                store.listenTo(action, store.actionCalled);
-                action(1337, 'ninja');
-
+            it( 'can listenTo the same action again', () => {
+                store.listenTo( action, store.actionCalled );
+                action( 1337, 'ninja' );
                 return assert.eventually.deepEqual(promise, [1337, 'ninja']);
-            });
+            } );
 
         });
 
-        it('should be able to reuse action again further down the chain', function() {
+        it('should be able to reuse action again further down the chain', () => {
             new class extends Store {
                 constructor() {
                     super();
@@ -94,17 +83,17 @@ describe('Creating stores', function() {
                 }
             }();
 
-            action(1337);
+            action( 1337 );
 
-            return assert.eventually.deepEqual(promise, [1337]);
+            return assert.eventually.deepEqual( promise, [1337] );
         });
 
-        describe('listening to the store', function() {
+        describe('listening to the store', () => {
             var unsubStoreCallback, storeListenPromise;
 
-            beforeEach(function() {
-                storeListenPromise = new Promise(function(resolve) {
-                    unsubStoreCallback = store.listen(function() {
+            beforeEach( () => {
+                storeListenPromise = new Promise( ( resolve ) => {
+                    unsubStoreCallback = store.listen( () => {
                         resolve(Array.prototype.slice.call(arguments, 0));
                     });
                 });
