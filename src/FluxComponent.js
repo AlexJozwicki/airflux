@@ -1,5 +1,6 @@
 /* @flow */
-//import type { Listenable } from './Listenable';
+import Listener from './Listener';
+import type { Listenable } from './Listener';
 
 type ListenToDefinition = {
     listenable  : Listenable;
@@ -18,7 +19,7 @@ export default function FluxComponent( target: ReactComponent ) {
     clazz.componentDidMount = function() {
         if( !!orgComponentDidMount ) orgComponentDidMount.call( this );
 
-        pendingListenables.forEach( ( pl ) => this.listenTo( pl.listenable, pl.callback ) );
+        mountedListenables.forEach( ( pl ) => listener.listenTo( pl.listenable, pl.callback ) );
     };
 
     const orgComponentWillMount = target.componentWillMount;
@@ -33,15 +34,13 @@ export default function FluxComponent( target: ReactComponent ) {
     };
 
     clazz.listenTo = function( listenable: Listenable, callback: Function | string, afterMounting: boolean = true ) {
-        var thisComponent = this;
-
-        if( mountedOnly ) {
-            pendingListenables.push( { listenable, callback } );
+        if( afterMounting ) {
+            mountedListenables.push( { listenable, callback } );
         }
         else {
             if( typeof callback === 'function' ) {
                 listener.listenTo( listenable, function() {
-                    callback.apply( thisComponent, arguments );
+                    callback.apply( this, arguments );
                 } );
             }
             else if( !!listenable.state ) {

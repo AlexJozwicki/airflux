@@ -8,6 +8,22 @@ Airflux should now be soon Flux compatible.
 
 ## Breaking changes
 
+### FluxComponent
+
+FluxComponent is now a ES7 decorator.
+It augments the Component with a listenTo function.
+This allows components to retain the exact same syntax as Store when it comes to definition.
+It also allows more use of class hierarchy. Before, if any class of you hierarchy needed to be connected to Flux, the root had
+to inherit from FluxComponent.
+You can now apply the decorator at any level.
+
+On component, listenTo takes a third argument: afterMounting.
+When set a true (default value), the callback will only be called AFTER the component has been successfully mounted.
+This is especially helpful if your callback makes use of setState.
+
+Set at false, it will be called as soon as the component is created in memory.
+
+
 ### SyncAction
 
 There is now a separate class for SyncAction.
