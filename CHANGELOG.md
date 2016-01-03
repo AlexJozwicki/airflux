@@ -19,6 +19,15 @@ action().then( () => console.log( 'will be called when your promise is resolved'
 
 ## Breaking changes
 
+### Callback should always be functions
+
+Up until now, the callbacks passed to listenTo could have been either functions or strings.
+Strings were always resolved to functions, using the object; and it could have a context of execution, that would have been applied to it.
+I think it's better if the user of the library does the actual resolution of names.
+ES7 syntax `::` also greatly simplifies binding whatever callbacks to an instance, should you need it.
+
+While still working, this syntax will soon be deprecated, as it's also hard to be properly typed and statically analysed.
+
 ### ES6 Import
 
 Use ES6 import syntax with airflux:
