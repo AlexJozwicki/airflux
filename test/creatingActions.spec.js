@@ -47,6 +47,14 @@ describe('Creating action', function() {
         assert.equal( functor.failed._isActionFunctor, true );
     });
 
+    it("should create a functor returning a Promise-like for Action with async results",function(){
+        var action = new Action().asyncResult( () => new Promise( ( resolve ) => setTimeout( resolve, 500 ) ) );
+        var functor = action.asFunction;
+        var spy = sinon.spy();
+        functor().then( spy );
+
+        setTimeout( () => assert.equal( spy.callCount, 1 ), 1000 );
+    });
 
     it("should add completed and failed child functors on the functor of async actions",function(){
         var functor = new Action().asyncResult().asFunction;

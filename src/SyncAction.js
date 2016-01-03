@@ -7,4 +7,8 @@ export default class SyncAction extends Action {
     }
 
     get sync() : boolean { return true; }
+
+    get asFunction() : Functor {
+        return this._createFunctor( this.triggerSync );
+    }
 }

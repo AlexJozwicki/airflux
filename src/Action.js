@@ -67,25 +67,22 @@ export default class Action extends Publisher {
      * Returns a synchronous function to trigger the action
      */
     get asSyncFunction() : Functor {
-        return this._createFunctor( true );
+        return this._createFunctor( this.triggerSync );
     }
 
     /**
     * Returns a function to trigger the action, async or sync depending on the action definition.
      */
     get asFunction() : Functor {
-        return this._createFunctor( this.sync );
+        return this._createFunctor( this.canHandlePromise() ? this.triggerPromise : this.trigger );
     }
-
-
 
 
     /**
      *
      */
-    _createFunctor( sync: boolean = false ) : Functor {
-        const trigger = sync ? this.triggerSync : this.trigger;
-        var functor = trigger.bind( this );
+    _createFunctor( triggerFn: Function ) : Functor {
+        var functor = triggerFn.bind( this );
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );
         Object.defineProperty( functor, 'action', { value: this } );

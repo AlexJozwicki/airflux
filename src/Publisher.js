@@ -11,8 +11,8 @@ export default class Publisher {
     //children           : Array< any >;
     _dispatchPromises  : Array< any >;
 
-    completed           : Function;
-    failed              : Function;
+    completed           : ?Action;
+    failed              : ?Action;
 
     /**
      * @protected
