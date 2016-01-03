@@ -1,11 +1,10 @@
 /* @flow */
 import * as _ from './utils';
 import Publisher from './Publisher';
-import instanceJoinCreator from './instanceJoinCreator';
+import Join from './Join';
 
-
-export type SubscriptionObj = { stop: Function; listenable: Action|Store };
 export type Listenable = Action | Store;
+export type SubscriptionObj = { stop: Function; listenable: Listenable | Array< Listenable > };
 
 
 /**
@@ -111,8 +110,8 @@ export default class Listener extends Publisher {
         };
 
         var subscriptionObj = {
-            stop: unsubscriber,
-            listenable: listenable
+            stop        : unsubscriber,
+            listenable  : listenable
         };
         subs.push(subscriptionObj);
         return subscriptionObj;
@@ -126,6 +125,8 @@ export default class Listener extends Publisher {
      */
     stopListeningTo( listenable: Listenable ) : boolean {
         var subs = this.subscriptions || [];
+
+        // TODO: use lodash array find or something
         for (var i = 0; i < subs.length; ++i) {
             var sub = subs[i];
             if (sub.listenable === listenable) {
@@ -137,6 +138,26 @@ export default class Listener extends Publisher {
         }
         return false;
     }
+
+    /**
+     * Adds a subscription
+     */
+    addSubscription( subscription: SubscriptionObj ) {
+        this.subscriptions.push( subscription );
+    }
+
+    /**
+     * Removes a subscription
+     */
+    removeSubscription( subscription: SubscriptionObj ) {
+        for( var i = 0; i < this.subscriptions.length; ++i ) {
+            if( this.subscriptions[i] === subscription ) {
+                this.subscriptions.splice( i, 1 );
+                return true;
+            }
+        }
+    }
+
 
     /**
      * Stops all subscriptions and empties subscriptions array
@@ -173,43 +194,74 @@ export default class Listener extends Publisher {
             }
         }
     }
+
+    /**
+     * The callback will be called once all listenables have triggered at least once.
+     * It will be invoked with the last emission from each listenable.
+     * @param {Function} callback The method to call when all publishers have emitted
+     * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
+     */
+    joinTrailing( callback: Function, ...listenables ) {
+        return this._createJoin( 'last', callback, listenables );
+    }
+
+
+    /**
+     * The callback will be called once all listenables have triggered at least once.
+     * It will be invoked with the first emission from each listenable.
+     * @param {...Publishers} publishers Publishers that should be tracked.
+     * @param {Function|String} callback The method to call when all publishers have emitted
+     * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
+     */
+    joinLeading( callback: Function, ...listenables ) {
+        return this._createJoin( 'first', callback, listenables );
+    }
+
+    /**
+     * The callback will be called once all listenables have triggered at least once.
+     * It will be invoked with all emission from each listenable.
+     * @param {...Publishers} publishers Publishers that should be tracked.
+     * @param {Function|String} callback The method to call when all publishers have emitted
+     * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
+     */
+    joinConcat( callback: Function, ...listenables ) {
+        return this._createJoin( 'all', callback, listenables );
+    }
+
+
+    /**
+     * The callback will be called once all listenables have triggered.
+     * If a callback triggers twice before that happens, an error is thrown.
+     * @param {...Publishers} publishers Publishers that should be tracked.
+     * @param {Function|String} callback The method to call when all publishers have emitted
+     * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
+     */
+    joinStrict( callback: Function, ...listenables ) {
+        return this._createJoin( 'strict', callback, listenables );
+    }
+
+
+    _createJoin( strategy: string, callback: Function, listenables: Array< Listenable > ) : SubscriptionObj {
+        _.throwIf( listenables.length < 2, 'Cannot create a join with less than 2 listenables!' );
+
+        // validate everything
+        listenables.forEach( ( listenable ) => _.throwIf( this.validateListening( listenable ) ) );
+
+        const stop: Function = new Join( listenables, strategy ).listen( callback );
+
+        var subobj = { listenable: listenables };
+        subobj.stop = () => {
+            stop();
+            this.removeSubscription( subobj );
+        };
+
+        this.subscriptions.push( subobj );
+
+        return subobj;
+    }
 }
 
-/**
- * The callback will be called once all listenables have triggered at least once.
- * It will be invoked with the last emission from each listenable.
- * @param {...Publishers} publishers Publishers that should be tracked.
- * @param {Function|String} callback The method to call when all publishers have emitted
- * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
- */
-Listener.prototype.joinTrailing = instanceJoinCreator('last');
 
-/**
- * The callback will be called once all listenables have triggered at least once.
- * It will be invoked with the first emission from each listenable.
- * @param {...Publishers} publishers Publishers that should be tracked.
- * @param {Function|String} callback The method to call when all publishers have emitted
- * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
- */
-Listener.prototype.joinLeading = instanceJoinCreator('first');
-
-/**
- * The callback will be called once all listenables have triggered at least once.
- * It will be invoked with all emission from each listenable.
- * @param {...Publishers} publishers Publishers that should be tracked.
- * @param {Function|String} callback The method to call when all publishers have emitted
- * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
- */
-Listener.prototype.joinConcat = instanceJoinCreator('all');
-
-/**
- * The callback will be called once all listenables have triggered.
- * If a callback triggers twice before that happens, an error is thrown.
- * @param {...Publishers} publishers Publishers that should be tracked.
- * @param {Function|String} callback The method to call when all publishers have emitted
- * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is an array of listenables
- */
-Listener.prototype.joinStrict = instanceJoinCreator('strict');
 
 
 /**

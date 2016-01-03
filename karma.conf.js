@@ -1,6 +1,13 @@
 // Reference: http://karma-runner.github.io/0.13/config/configuration-file.html
 module.exports = function karmaConfig (config) {
     config.set({
+//        logLevel: config.LOG_DEBUG,
+        client: {
+            captureConsole: true,
+            mocha: {
+                bail: true
+            }
+        },
         frameworks: [
             // Reference: https://github.com/karma-runner/karma-mocha // Set framework to mocha
             'mocha', 'sinon'

@@ -43,6 +43,7 @@ exports.object = function(keys,vals){
 };
 
 
+
 exports.isArguments = function(value) {
     return typeof value === 'object' && ('callee' in value) && typeof value.length === 'number';
 };

@@ -2,13 +2,13 @@
 import Store from './Store';
 
 
-function joinClassFactory( join: string ) {
+function joinClassFactory( join: string ) : Class< Store > {
     return class extends Store {
         constructor() {
             super();
 
-            var listenables = [ ...arguments, 'trigger' ];
-            this[ join ]( ...listenables );
+            var listenables = [ ...arguments ];
+            this[ join ]( this.trigger.bind( this ), ...listenables );
         }
     };
 }
