@@ -7,8 +7,8 @@ function joinClassFactory( join: string ) {
         constructor() {
             super();
 
-            var listenables = [ 'trigger', ...arguments ];
-            this[join]( ...listenables );
+            var listenables = [ ...arguments, 'trigger' ];
+            this[ join ]( ...listenables );
         }
     };
 }
@@ -20,7 +20,8 @@ var JoinTrailingStore   = joinClassFactory( 'joinTrailing' );
 var JoinConcatStore     = joinClassFactory( 'joinConcat' );
 
 
-export function joinStrict() { return new JoinStrictStore( ...arguments ) };
-export function joinLeading() { return new JoinLeadingStore( ...arguments ); };
-export function joinTrailing() { return new JoinTrailingStore( ...arguments ); };
-export function joinConcat() { return new JoinConcatStore( ...arguments ); };
+export function joinStrict()    { return new JoinStrictStore( ...arguments ) };
+export function joinLeading()   { return new JoinLeadingStore( ...arguments ); };
+export function all()           { return new JoinTrailingStore( ...arguments ); };
+export function joinTrailing()  { return new JoinTrailingStore( ...arguments ); };
+export function joinConcat()    { return new JoinConcatStore( ...arguments ); };

@@ -20,7 +20,7 @@ describe('Composed listenables', function() {
         action1 = new Action().asFunction;
         action2 = new Action().asFunction;
         action3 = new Action().asFunction;
-        all = airflux.all(action1, action2, action3);
+        all = airflux.Joins.all( action1, action2, action3 );
     });
 
 
@@ -140,7 +140,7 @@ describe('Composed listenable with stores', function() {
                 this.listenTo(action, this.triggerSync);
             }
         }();
-        all = airflux.all(store1, store2);
+        all = airflux.Joins.all(store1, store2);
     });
 
     it('should emit when action is invoked', function() {

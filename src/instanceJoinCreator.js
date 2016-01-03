@@ -18,10 +18,10 @@ export default function instanceJoinCreator(strategy) {
         var callback = listenables.pop();
         var numberOfListenables = listenables.length;
         var join = {
-            numberOfListenables: numberOfListenables,
-            callback: this[callback] || callback,
-            listener: this,
-            strategy: strategy
+            numberOfListenables : numberOfListenables,
+            callback            : this[callback] || callback,
+            listener            : this,
+            strategy            : strategy
         };
         var cancels = [];
 
@@ -35,7 +35,7 @@ export default function instanceJoinCreator(strategy) {
         reset(join);
 
         var subobj = { listenable: listenables };
-        subobj.stop = makeStopper(subobj,cancels,this);
+        subobj.stop = makeStopper( subobj, cancels, this );
 
         this.subscriptions = (this.subscriptions || []).concat(subobj);
 

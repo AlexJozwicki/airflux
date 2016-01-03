@@ -96,12 +96,12 @@ export default class Listener extends Publisher {
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
     listenTo( listenable: Listenable, callback: Function | string, defaultCallback: Function | string ) : SubscriptionObj  {
-        _.throwIf(this.validateListening(listenable));
+        _.throwIf( this.validateListening( listenable ) );
 
         this.fetchInitialState(listenable, defaultCallback);
 
         var subs = this.subscriptions;
-        var desub = listenable.listen(this[callback] || callback, this);
+        var desub = listenable.listen( this[callback] || callback, this );
         var unsubscriber = function () {
             var index = subs.indexOf(subscriptionObj);
             _.throwIf(index === -1,
