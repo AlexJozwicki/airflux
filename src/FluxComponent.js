@@ -11,47 +11,50 @@ type ListenToDefinition = {
 
 export default function FluxComponent( target ) {
     var clazz = target.prototype;
-    var listener = new Listener();
 
     // pending listenables to be activated upon mounting
-    var mountedListenables : Array< ListenToDefinition > = [];
+    var listens : Array< ListenToDefinition > = [];
 
     const orgComponentDidMount = clazz.componentDidMount;
     clazz.componentDidMount = function() {
         if( !!orgComponentDidMount ) orgComponentDidMount.call( this );
-
-        mountedListenables.forEach( ( pl ) => listener.listenTo( pl.listenable, pl.callback ) );
+        this.__listener = new Listener();
+        listens.forEach( ( pl ) => this.__mountListener( pl.listenable, pl.callback ) );
     };
 
     const orgComponentWillMount = clazz.componentWillMount;
     clazz.componentWillMount = function() {
+        listens.forEach( ( pl ) => this.__initState( pl.listenable, pl.callback ) );
         if( !!orgComponentWillMount ) orgComponentWillMount.call( this );
     };
 
     const orgComponentWillUnmount = clazz.componentWillUnmount;
     clazz.componentWillUnmount = function() {
-        listener.stopListeningToAll();
+        this.__listener.stopListeningToAll();
         if( !!orgComponentWillUnmount ) orgComponentWillUnmount.call( this );
     };
 
-    clazz.listenTo = function( listenable: Publisher, callback: Function | string, afterMounting: boolean = true ) {
-        if( afterMounting ) {
-            mountedListenables.push( { listenable, callback } );
+    clazz.__initState = function( listenable: Publisher, callback: Function | string ) {
+        if( typeof callback === 'string' && !!listenable.state ) {
+            this.state = this.state || {};
+            this.state[ callback ] = listenable.state;
         }
-        else {
-            if( typeof callback === 'function' ) {
-                listener.listenTo( listenable, function() {
-                    // $FlowDynamicTypeCheckBug
-                    callback.apply( this, arguments );
-                } );
-            }
-            else if( typeof callback === 'string' && !!listenable.state ) {
-                this.state = this.state || {};
-                this.state[ callback ] = listenable.state;
+    }
 
+    clazz.__mountListener = function( listenable: Publisher, callback: Function | string ) {
+        if( typeof callback === 'function' ) {
+            this.__listener.listenTo( listenable, function() {
                 // $FlowDynamicTypeCheckBug
-                listener.listenTo( listenable, ( value ) => this.setState( { [callback]: value } ) );
-            }
+                callback.apply( this, arguments );
+            } );
         }
+        else if( typeof callback === 'string' && !!listenable.state ) {
+            // $FlowDynamicTypeCheckBug
+            this.__listener.listenTo( listenable, ( value ) => this.setState( { [callback]: value } ) );
+        }
+    }
+
+    clazz.listenTo = function( listenable: Publisher, callback: Function | string ) {
+        listens.push( { listenable, callback } );
     };
 }
