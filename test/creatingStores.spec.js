@@ -236,7 +236,7 @@ describe('Creating stores', () => {
                 }
 
                 _cl.prototype.onFoo = "methodFOO";
-                _cl.prototype.bar = sinon.spy();
+                _cl.prototype.bar = sinon.spy();
                 _cl.prototype.onBaz = sinon.spy();
                 _cl.prototype.onBazDefault = sinon.spy();
 

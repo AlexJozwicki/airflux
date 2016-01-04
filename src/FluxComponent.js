@@ -18,7 +18,7 @@ export default function FluxComponent( target ) {
     const orgComponentDidMount = clazz.componentDidMount;
     clazz.componentDidMount = function() {
         if( !!orgComponentDidMount ) orgComponentDidMount.call( this );
-        this.__listener = this.__listener || new Listener();
+        this.__listener = this.__listener || new Listener();
         listens.forEach( ( pl ) => this.__mountListener( pl.listenable, pl.callback ) );
     };
 

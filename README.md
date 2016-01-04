@@ -149,7 +149,7 @@ asyncResultAction.listen( ( arguments ) =>
 
 asyncResultAction.listen( ( arguments ) => asyncResultAction.promise( someAsyncOperation( arguments ) ) );
 
-asyncResultAction.listen( someAsyncOperation );
+asyncResultAction.listen( someAsyncOperation );
 ```
 
 `.asyncResult` can take the listen function as a parameter. Therefore, the declaration before can be simplified as:
