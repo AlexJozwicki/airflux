@@ -18,7 +18,7 @@ export default function FluxComponent( target ) {
     const orgComponentDidMount = clazz.componentDidMount;
     clazz.componentDidMount = function() {
         if( !!orgComponentDidMount ) orgComponentDidMount.call( this );
-        this.__listener = new Listener();
+        this.__listener = this.__listener || new Listener();
         listens.forEach( ( pl ) => this.__mountListener( pl.listenable, pl.callback ) );
     };
 
@@ -30,7 +30,7 @@ export default function FluxComponent( target ) {
 
     const orgComponentWillUnmount = clazz.componentWillUnmount;
     clazz.componentWillUnmount = function() {
-        this.__listener.stopListeningToAll();
+        if( !!this.__listener ) this.__listener.stopListeningToAll();
         if( !!orgComponentWillUnmount ) orgComponentWillUnmount.call( this );
     };
 
@@ -42,10 +42,12 @@ export default function FluxComponent( target ) {
     }
 
     clazz.__mountListener = function( listenable: Publisher, callback: Function | string ) {
+        const $this = this;
+
         if( typeof callback === 'function' ) {
             this.__listener.listenTo( listenable, function() {
                 // $FlowDynamicTypeCheckBug
-                callback.apply( this, arguments );
+                callback.apply( $this, arguments );
             } );
         }
         else if( typeof callback === 'string' && !!listenable.state ) {
