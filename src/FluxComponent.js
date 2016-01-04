@@ -50,7 +50,7 @@ export default function FluxComponent( target ) {
                 callback.apply( $this, arguments );
             } );
         }
-        else if( typeof callback === 'string' && !!listenable.state ) {
+        else if( typeof callback === 'string' ) {
             // $FlowDynamicTypeCheckBug
             this.__listener.listenTo( listenable, ( value ) => this.setState( { [callback]: value } ) );
         }
