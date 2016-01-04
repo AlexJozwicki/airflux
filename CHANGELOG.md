@@ -52,11 +52,6 @@ It also allows more use of class hierarchy. Before, if any class of you hierarch
 to inherit from FluxComponent.
 You can now apply the decorator at any level.
 
-On component, listenTo takes a third argument: afterMounting.
-When set a true (default value), the callback will only be called AFTER the component has been successfully mounted.
-This is especially helpful if your callback makes use of setState.
-
-Set at false, it will be called as soon as the component is created in memory.
 
 ```javascript
 import React, { Component } from 'react';
