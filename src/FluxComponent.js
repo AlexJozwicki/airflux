@@ -42,10 +42,8 @@ export default function FluxComponent( target ) {
     };
 
     clazz.__initState = function( store: Store, stateKey: string ) {
-        if( store.hasOwnProperty( 'state' ) ) {
-            this.state = this.state || {};
-            this.state[ stateKey ] = store.state;
-        }
+        this.state = this.state || {};
+        this.state[ stateKey ] = store.state;
     }
 
     clazz.__listenToStore = function( store: Store, stateKey: string ) {
@@ -62,7 +60,7 @@ export default function FluxComponent( target ) {
         } );
     }
 
-    clazz.connectState = function( store: Store, stateKey: string ) {
+    clazz.connectStore = function( store: Store, stateKey: string ) {
         stores.push( { store, stateKey } );
     };
 
