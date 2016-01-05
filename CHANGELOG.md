@@ -26,8 +26,6 @@ Strings were always resolved to functions, using the object; and it could have a
 I think it's better if the user of the library does the actual resolution of names.
 ES7 syntax `::` also greatly simplifies binding whatever callbacks to an instance, should you need it.
 
-While still working, this syntax will soon be deprecated, as it's also hard to be properly typed and statically analysed.
-
 ### ES6 Import
 
 Use ES6 import syntax with airflux:
@@ -64,10 +62,16 @@ class YourComponent extends Component {
     constructor( props ) {
         super( props );
         this.listenTo( action, this.actionHandler );
+        this.listenTo( oneStore, this.storeCallback );         // storeCallback will be called each time the state of the store changes
+        this.connectStore( anotherStore, 'stateKey' );         // this.state.stateKey will be always in sync with store.state
     }
 
     actionHandler() {
 
+    }
+
+    storeCallback( storeState ) {
+        
     }
 }
 ```

@@ -3,9 +3,14 @@ import Listener from './Listener';
 import type Publisher from './Publisher';
 
 
-type ListenToDefinition = {
-    listenable  : Publisher;
-    callback    : Function | string;
+type ListenToPublisher = {
+    publisher   : Publisher;
+    callback    : Function;
+};
+
+type ListenToStore = {
+    store       : Store;
+    stateKey    : string;
 };
 
 
@@ -13,18 +18,20 @@ export default function FluxComponent( target ) {
     var clazz = target.prototype;
 
     // pending listenables to be activated upon mounting
-    var listens : Array< ListenToDefinition > = [];
+    var publishers  : Array< ListenToPublisher > = [];
+    var stores      : Array< ListenToStore > = [];
 
     const orgComponentDidMount = clazz.componentDidMount;
     clazz.componentDidMount = function() {
         if( !!orgComponentDidMount ) orgComponentDidMount.call( this );
         this.__listener = this.__listener || new Listener();
-        listens.forEach( ( pl ) => this.__mountListener( pl.listenable, pl.callback ) );
+        publishers.forEach( ( pub ) => this.__listenToPublisher( pub.publisher, pub.callback ) );
+        stores.forEach( ( st ) => this.__listenToStore( st.store, st.stateKey ) );
     };
 
     const orgComponentWillMount = clazz.componentWillMount;
     clazz.componentWillMount = function() {
-        listens.forEach( ( pl ) => this.__initState( pl.listenable, pl.callback ) );
+        stores.forEach( ( st ) => this.__initState( st.store, st.stateKey ) );
         if( !!orgComponentWillMount ) orgComponentWillMount.call( this );
     };
 
@@ -34,29 +41,32 @@ export default function FluxComponent( target ) {
         if( !!orgComponentWillUnmount ) orgComponentWillUnmount.call( this );
     };
 
-    clazz.__initState = function( listenable: Publisher, callback: Function | string ) {
-        if( typeof callback === 'string' && !!listenable.state ) {
+    clazz.__initState = function( store: Store, stateKey: string ) {
+        if( store.hasOwnProperty( 'state' ) ) {
             this.state = this.state || {};
-            this.state[ callback ] = listenable.state;
+            this.state[ stateKey ] = store.state;
         }
     }
 
-    clazz.__mountListener = function( listenable: Publisher, callback: Function | string ) {
+    clazz.__listenToStore = function( store: Store, stateKey: string ) {
+        // $FlowDynamicTypeCheckBug
+        this.__listener.listenTo( store, ( value ) => this.setState( { [stateKey]: value } ) );
+    }
+
+    clazz.__listenToPublisher = function( publisher: Publisher, callback: Function ) {
         const $this = this;
 
-        if( typeof callback === 'function' ) {
-            this.__listener.listenTo( listenable, function() {
-                // $FlowDynamicTypeCheckBug
-                callback.apply( $this, arguments );
-            } );
-        }
-        else if( typeof callback === 'string' ) {
+        this.__listener.listenTo( publisher, function() {
             // $FlowDynamicTypeCheckBug
-            this.__listener.listenTo( listenable, ( value ) => this.setState( { [callback]: value } ) );
-        }
+            callback.apply( $this, arguments );
+        } );
     }
 
-    clazz.listenTo = function( listenable: Publisher, callback: Function | string ) {
-        listens.push( { listenable, callback } );
+    clazz.connectState = function( store: Store, stateKey: string ) {
+        stores.push( { store, stateKey } );
+    };
+
+    clazz.listenTo = function( publisher: Publisher, callback: Function ) {
+        publishers.push( { publisher, callback } );
     };
 }
