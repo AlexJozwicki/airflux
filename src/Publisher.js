@@ -8,18 +8,14 @@ import * as _ from './utils';
  */
 export default class Publisher {
     emitter            : any;
-    //children           : Array< any >;
     _dispatchPromises  : Array< any >;
 
-    completed           : ?Action;
-    failed              : ?Action;
 
     /**
      * @protected
      */
     constructor() {
         this.emitter = new _.EventEmitter();
-        //this.children = [];
         this._dispatchPromises = [];
     }
 
@@ -125,62 +121,6 @@ export default class Publisher {
                .catch( ( error ) => this.failed.asFunction( error ) );
     }*/
 
-    /**
-     * Attach handlers to promise that trigger the completed and failed
-     * child publishers, if available.
-     *
-     * @param {Object} promise The result to use or a promise to which to listen.
-     */
-     // TODO: MOVE TO ACTION
-     // as calling completed and failed is completely specific to an action, this should be moved to the Action class.
-    resolve( promise: Promise ) {
-        const canHandlePromise = this.canHandlePromise();
-        if( !canHandlePromise ) {
-            throw new Error('Not an async publisher');
-        }
-
-        if( !_.isPromise( promise ) ) {
-            this.completed.asFunction( promise );
-            return;
-        }
-
-        return promise.then( ( response ) => this.completed.asFunction( response ), ( error ) => this.failed.asFunction( error ) );
-    }
-
-
-    reject( result: any ) {
-        if( _.isPromise( result ) ) {
-            console.warn('Use #resolve() for promises.');
-            return;
-        }
-
-        this.failed( result );
-    }
-
-
-    then( onSuccess: ?Function, onFailure: ?Function ) {
-        const canHandlePromise : boolean = this.canHandlePromise();
-        if (!canHandlePromise) {
-            throw new Error('Not an async publisher');
-        }
-
-        if( onSuccess ) {
-            this.completed.listenOnce( onSuccess );
-        }
-        if( onFailure ) {
-            this.failed.listenOnce( onFailure );
-        }
-    }
-
-
-    catch( onFailure: Function ) {
-        this.then(null, onFailure);
-    }
-
-
-    canHandlePromise() : boolean {
-        return !!this.completed && !!this.failed;// && this.completed._isActionFunctor && this.failed._isActionFunctor;
-    }
 
     /**
      * Publishes an event using `this.emitter` (if `shouldEmit` agrees)
@@ -209,33 +149,18 @@ export default class Publisher {
     }
 
     /**
-     * Returns a Promise for the triggered action
+     * Attach handlers to promise that trigger the completed and failed
+     * child publishers, if available.
+     *
+     * @param {Object} promise The result to use or a promise to which to listen.
      */
-    triggerPromise() : Promise {
-        const canHandlePromise = this.canHandlePromise();
-        if (!canHandlePromise) {
-            throw new Error('Publisher must have "completed" and "failed" child publishers');
+    resolve( promise: Promise ) {
+        if( !_.isPromise( promise ) ) {
+            this.completed.asFunction( promise );
+            return;
         }
 
-        const args = arguments;
-
-        const promise = new Promise( ( resolve, reject ) => {
-            var removeSuccess = this.completed.listen( ( args ) => {
-                removeSuccess();
-                removeFailed();
-                resolve( args );
-            });
-
-            var removeFailed = this.failed.listen( ( args ) => {
-                removeSuccess();
-                removeFailed();
-                reject( args );
-            });
-
-            this.trigger.apply( this, args );
-        });
-
-        return promise;
+        return promise.then( ( response ) => this.completed.asFunction( response ), ( error ) => this.failed.asFunction( error ) );
     }
 
     /**

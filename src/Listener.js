@@ -51,30 +51,6 @@ export default class Listener extends Publisher {
 
 
     /**
-     * A convenience method that listens to all listenables in the given object.
-     *
-     * @param {Object} listenables An object of listenables. Keys will be used as callback method names.
-     */
-    listenToMany( listenables: { [key: string]: Publisher } ) {
-        var allListenables = flattenListenables( listenables );
-        for (var key in allListenables) {
-            var cbname = _.callbackName(key);
-            // $FlowComputedProperty
-            var localname = this[cbname] ? cbname : this[key] ? key : undefined;
-            if (localname) {
-                var callback = (
-                    // $FlowComputedProperty
-                    this[cbname + 'Default'] ||
-                    // $FlowComputedProperty
-                    this[localname + 'Default'] ||
-                    localname
-                );
-                this.listenTo(allListenables[key], localname, callback);
-            }
-        }
-    }
-
-    /**
      * Checks if the current context can listen to the supplied listenable
      *
      * @param {Action|Store} listenable An Action or Store that should be
@@ -103,19 +79,15 @@ export default class Listener extends Publisher {
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
     // TODO: deprecate the callback being a string
-    listenTo( listenable: Publisher, callback: Function | string, defaultCallback: ?(Function | string) ) : SubscriptionObj  {
+    listenTo( listenable: Publisher, callback: Function, defaultCallback: ?(Function | string) ) : SubscriptionObj  {
         _.throwIf( this.validateListening( listenable ) );
-
-        if( !!defaultCallback )
-            this.fetchInitialState( listenable, defaultCallback );
 
         var subs = this.subscriptions;
         // $FlowComputedProperty
-        var desub = listenable.listen( this[callback] || callback, this );
+        var desub = listenable.listen( callback, this );
         var unsubscriber = function () {
             var index = subs.indexOf(subscriptionObj);
-            _.throwIf(index === -1,
-                    'Tried to remove listen already gone from subscriptions list!');
+            _.throwIf(index === -1, 'Tried to remove listen already gone from subscriptions list!' );
             subs.splice(index, 1);
             desub();
         };
@@ -178,34 +150,7 @@ export default class Listener extends Publisher {
         var remaining;
         while ((remaining = subs.length)) {
             subs[0].stop();
-            _.throwIf(subs.length !== remaining - 1,
-                    'Failed to remove listen from subscriptions list!');
-        }
-    }
-
-    /**
-     * Used in `listenTo`. Fetches initial data from a publisher if it has a `state` getter.
-     * @param {Action|Store} listenable The publisher we want to get initial state from
-     * @param {Function|String} defaultCallback The method to receive the data
-     */
-     // TODO: deprecate the callback being a string
-    fetchInitialState( listenable: Publisher, defaultCallback: Function | string ) {
-        //const callback: Function = typeof defaultCallback === 'string' ? this[defaultCallback] : defaultCallback;
-        if (typeof defaultCallback === 'string') {
-            // $FlowComputedProperty
-            defaultCallback = this[defaultCallback];
-        }
-
-        var self = this;
-        if (_.isFunction(defaultCallback) && listenable.state ) {
-            var data = listenable.state;
-            if (data && _.isFunction(data.then)) {
-                data.then(function() {
-                    defaultCallback.apply(self, arguments);
-                });
-            } else {
-                defaultCallback.call(this, data);
-            }
+            _.throwIf(subs.length !== remaining - 1, 'Failed to remove listen from subscriptions list!' );
         }
     }
 
