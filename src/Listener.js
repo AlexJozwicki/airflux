@@ -102,6 +102,7 @@ export default class Listener extends Publisher {
      * @param {Function|String} defaultCallback The callback to register as default handler
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
+    // TODO: deprecate the callback being a string
     listenTo( listenable: Publisher, callback: Function | string, defaultCallback: ?(Function | string) ) : SubscriptionObj  {
         _.throwIf( this.validateListening( listenable ) );
 
@@ -187,6 +188,7 @@ export default class Listener extends Publisher {
      * @param {Action|Store} listenable The publisher we want to get initial state from
      * @param {Function|String} defaultCallback The method to receive the data
      */
+     // TODO: deprecate the callback being a string
     fetchInitialState( listenable: Publisher, defaultCallback: Function | string ) {
         //const callback: Function = typeof defaultCallback === 'string' ? this[defaultCallback] : defaultCallback;
         if (typeof defaultCallback === 'string') {
