@@ -18,10 +18,6 @@ type ListenToStore = {
 export default function FluxComponent( target: Function ) {
     var clazz = target.prototype;
 
-    // pending listenables to be activated upon mounting
-    var publishers  : Array< ListenToPublisher > = [];
-    var stores      : Array< ListenToStore > = [];
-
     /**
      * Wrap the componentDidMount with our own.
      * We will start listening to every action once the component is mounted.
@@ -29,9 +25,10 @@ export default function FluxComponent( target: Function ) {
     const orgComponentDidMount = clazz.componentDidMount;
     clazz.componentDidMount = function() {
         if( !!orgComponentDidMount ) orgComponentDidMount.call( this );
+
         this.__listener = this.__listener || new Listener();
-        publishers.forEach( ( pub ) => this.__listenToPublisher( pub.publisher, pub.callback ) );
-        stores.forEach( ( st ) => this.__listenToStore( st.store, st.stateKey ) );
+        this.__publishers.forEach( ( pub ) => this.__listenToPublisher( pub.publisher, pub.callback ) );
+        this.__stores.forEach( ( st ) => this.__listenToStore( st.store, st.stateKey ) );
     };
 
     /**
@@ -42,7 +39,10 @@ export default function FluxComponent( target: Function ) {
     const orgComponentWillMount = clazz.componentWillMount;
     clazz.componentWillMount = function() {
         this.state = this.state || {};
-        stores.forEach( ( st ) => this.state[ st.stateKey ] = st.store.state );
+        this.__publishers = this.__publishers || [];
+        this.__stores = this.__stores || [];
+
+        this.__stores.forEach( ( st ) => this.state[ st.stateKey ] = st.store.state );
         if( !!orgComponentWillMount ) orgComponentWillMount.call( this );
     };
 
@@ -81,7 +81,8 @@ export default function FluxComponent( target: Function ) {
      * @param  {string} stateKey    the key in the state of the component where the state of the store will be put
      */
     clazz.connectStore = function( store: Store, stateKey: string ) {
-        stores.push( { store, stateKey } );
+        this.__stores = this.__stores || [];
+        this.__stores.push( { store, stateKey } );
     };
 
     /**
@@ -90,6 +91,7 @@ export default function FluxComponent( target: Function ) {
      * @param  {Function} callback
      */
     clazz.listenTo = function( publisher: Publisher, callback: Function ) {
-        publishers.push( { publisher, callback } );
+        this.__publishers = this.__publishers || [];
+        this.__publishers.push( { publisher, callback } );
     };
 }
