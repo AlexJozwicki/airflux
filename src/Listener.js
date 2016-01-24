@@ -18,11 +18,11 @@ export type SubscriptionObj = {
  * @extends {Publisher}
  */
 export default class Listener extends Publisher {
-    subscriptions: Array< SubscriptionObj >;
+    subscriptions: Array< SubscriptionObj > = [];
 
     constructor() {
         super();
-        this.subscriptions = [];
+//        this.subscriptions = [];
     }
 
 
@@ -86,21 +86,15 @@ export default class Listener extends Publisher {
         if( !!defaultCallback )
             this.fetchInitialState( listenable, defaultCallback );
 
-        var subs = this.subscriptions;
         var desub = listenable.listen( callback, this );
-        var unsubscriber = function () {
-            var index = subs.indexOf(subscriptionObj);
-            _.throwIf(index === -1,
-                    'Tried to remove listen already gone from subscriptions list!');
-            subs.splice(index, 1);
+        var unsubscriber = () => {
+            var index = this.subscriptions.indexOf(subscriptionObj);
+            _.throwIf( index === -1, 'Tried to remove listen already gone from subscriptions list!' );
+            this.subscriptions.splice( index, 1 );
             desub();
         };
 
-        var subscriptionObj = {
-            stop        : unsubscriber,
-            listenable  : listenable
-        };
-        subs.push(subscriptionObj);
+        const subscriptionObj = this.addSubscription( unsubscriber, listenable );
         return subscriptionObj;
     }
 
@@ -116,7 +110,7 @@ export default class Listener extends Publisher {
         // TODO: use lodash array find or something
         for (var i = 0; i < subs.length; ++i) {
             var sub = subs[i];
-            if (sub.listenable === listenable) {
+            if( sub.listenable === listenable ) {
                 sub.stop();
                 _.throwIf(subs.indexOf(sub) !== -1,
                         'Failed to remove listen from subscriptions list!');
@@ -129,8 +123,10 @@ export default class Listener extends Publisher {
     /**
      * Adds a subscription
      */
-    addSubscription( subscription: SubscriptionObj ) {
-        this.subscriptions.push( subscription );
+    addSubscription( stop: () => void, listenable: Publisher ) : SubscriptionObj {
+        const subscriptionObj : SubscriptionObj = { stop, listenable };
+        this.subscriptions.push( subscriptionObj );
+        return subscriptionObj;
     }
 
     /**

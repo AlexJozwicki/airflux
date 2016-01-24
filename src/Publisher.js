@@ -88,10 +88,9 @@ export default class Publisher {
             args = _.isArguments(preResult) ? preResult : [].concat(preResult);
         }
 
-        if( this.shouldEmit.apply( this, args ) ) {
-            this._dispatchPromises = [];
-            this.emitter.emit( this. eventLabel, args );
-        }
+        if( !this.shouldEmit.apply( this, args ) ) return;
+
+        this.emitter.emit( this.eventLabel, args );
     }
 
     /**
