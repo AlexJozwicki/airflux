@@ -267,7 +267,7 @@ describe('Creating actions with children to an action definition object', functi
             promise = new Promise(function(resolve) {
                 actions.bar.baz.listen(function() {
                     resolve(Array.prototype.slice.call(arguments, 0));
-                }, {}); // pass empty context
+                }); // pass empty context
             });
         });
 
@@ -300,7 +300,7 @@ describe('Creating actions with children to an action definition object', functi
             promise = new Promise(function(resolve) {
                 actions.promisedFoo.completed.listen(function(){
                     resolve.apply(null, arguments);
-                }, {}); // pass empty context
+                }); // pass empty context
             });
         });
 

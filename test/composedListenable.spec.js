@@ -47,7 +47,7 @@ describe('Composed listenables', function() {
         var called = false;
         all.listen(function() {
             called = true;
-        }, null);
+        });
 
         action3('c');
 
@@ -62,7 +62,7 @@ describe('Composed listenables', function() {
         var called = false;
         all.listen(function() {
             called = true;
-        }, null);
+        });
 
         action1('a');
         action3('c');

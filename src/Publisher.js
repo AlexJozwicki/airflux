@@ -1,5 +1,6 @@
 /* @flow */
 import * as _ from './utils';
+import invariant from 'invariant';
 
 export type UnsubscribeFunction = () => void;
 
@@ -52,24 +53,27 @@ export default class Publisher {
      * @param {Mixed} [optional] bindContext The context to bind the callback with
      * @returns {Function} Callback that unsubscribes the registered event handler
      */
-    listen( callback: ( x: any ) => ?Promise, bindContext: any ) : UnsubscribeFunction {
+    listen( callback: ( x: any ) => ?Promise ) : UnsubscribeFunction {
+        invariant( typeof callback === 'function', 'listen has to be given a valid callback function' );
+
         var aborted = false;
-        bindContext = bindContext || this;
 
         var eventHandler = ( args ) => {
             if( aborted ) return;
-            this.processResult( callback.apply( bindContext, args ) );
+            this.processResult( callback.apply( this, args ) );
         };
-        this.emitter.addListener( this. eventLabel, eventHandler );
+        this.emitter.addListener( this.eventLabel, eventHandler );
 
         return () => {
             aborted = true;
-            this.emitter.removeListener( this. eventLabel, eventHandler );
+            this.emitter.removeListener( this.eventLabel, eventHandler );
         };
     }
 
 
     listenOnce( callback: Function, bindContext: any ) : UnsubscribeFunction {
+        invariant( typeof callback === 'function', 'listenOnce has to be given a valid callback function' );
+
         bindContext = bindContext || this;
         var unsubscribe = this.listen( () => {
             var args = Array.prototype.slice.call(arguments);

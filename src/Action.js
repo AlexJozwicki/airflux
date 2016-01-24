@@ -3,7 +3,7 @@ import Publisher                    from './Publisher';
 import type { UnsubscribeFunction } from './Publisher';
 
 
-export type Functor = $All< Function, {
+export type ActionFunctor = $All< Function, {
     _isActionFunctor    : boolean;
     action              : Action;
     listen              : ( callback: ( x: any ) => ?Promise ) => UnsubscribeFunction;
@@ -52,14 +52,14 @@ export default class Action extends Publisher {
     /**
      * Returns a synchronous function to trigger the action
      */
-    get asSyncFunction() : Functor {
+    get asSyncFunction() : ActionFunctor {
         return this.createFunctor( this.triggerSync );
     }
 
     /**
     * Returns a function to trigger the action, async or sync depending on the action definition.
      */
-    get asFunction() : Functor {
+    get asFunction() : ActionFunctor {
         return this.createFunctor( this.trigger );
     }
 
@@ -67,7 +67,7 @@ export default class Action extends Publisher {
     /**
      *
      */
-    createFunctor( triggerFn: Function ) : Functor {
+    createFunctor( triggerFn: Function ) : ActionFunctor {
         var functor = triggerFn.bind( this );
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );

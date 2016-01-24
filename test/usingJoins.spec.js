@@ -15,7 +15,7 @@ describe('using joins',function(){
                 action1 = { listen:sinon.spy() },
                 action2 = { listen:sinon.spy() },
                 action3 = { listen:sinon.spy() };
-            store.validateListening = sinon.stub().returns('ERROR! ERROR!');
+            store.validateListening = sinon.stub().throws('ERROR! ERROR!');
 
             it('should throw an error and not set any listens',function(){
                 assert.throws(function(){
@@ -60,8 +60,8 @@ describe('using joins',function(){
                 assert.isFunction( result.stop );
             });
             it("should add the returned subscription object to the context subscriptions array",function(){
-                assert.equal(1,store.subscriptions.length);
-                assert.equal(result,store.subscriptions[0]);
+                assert.equal(1,store._subscriptions.length);
+                assert.equal(result,store._subscriptions[0]);
             });
             it("should validate each individual listenable in the join",function(){
                 assert.equal(3,validate.callCount);

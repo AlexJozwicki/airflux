@@ -2,6 +2,8 @@
 var slice = Array.prototype.slice;
 import type Publisher from './Publisher';
 
+export type JoinStrategies = 'strict' | 'first' | 'last' | 'all';
+
 
 export default class Join {
     _strategy           : string;
@@ -12,7 +14,7 @@ export default class Join {
 
 
 
-    constructor( listenables: Array< Publisher >, strategy: string ) {
+    constructor( listenables: Array< Publisher >, strategy: JoinStrategies ) {
         this._listenables = listenables;
         this._strategy = strategy;
         this._reset();
@@ -26,7 +28,7 @@ export default class Join {
     }
 
     listen( callback: Function ) : () => void {
-        const cancels = this._listenables.map( ( listenable, i ) => listenable.listen( this._newListener( i ), this ) )
+        const cancels = this._listenables.map( ( listenable, i ) => listenable.listen( this._newListener( i ).bind( this ) ) )
         this._callback = callback;
 
         return () => cancels.forEach( ( cancel ) => cancel() );

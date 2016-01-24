@@ -1,8 +1,8 @@
 /* @flow */
-import AsyncResultAction            from './AsyncResultAction';
-import type Action, { Functor }     from './Action';
+import AsyncResultAction                from './AsyncResultAction';
+import type Action, { ActionFunctor }   from './Action';
 
-export type PromiseFunctor = $All< Functor, {
+export type PromiseFunctor = $All< ActionFunctor, {
     completed   : Action;
     failed      : Action;
 } >;

@@ -1,10 +1,14 @@
 /* @flow */
-import * as _ from './utils';
-import Publisher from './Publisher';
-import Join from './Join';
+import * as _                   from './utils';
+import invariant                from 'invariant';
 
-import type Action from './Action';
-import type Store from './Store';
+import Publisher                from './Publisher';
+import Join                     from './Join';
+import type { JoinStrategies }  from './Join';
+
+import type Action              from './Action';
+import type { ActionFunctor }   from './Action';
+import type Store               from './Store';
 
 export type SubscriptionObj = {
     stop: Function;
@@ -18,35 +22,26 @@ export type SubscriptionObj = {
  * @extends {Publisher}
  */
 export default class Listener extends Publisher {
-    subscriptions: Array< SubscriptionObj > = [];
+    _subscriptions: Array< SubscriptionObj > = [];
 
     constructor() {
         super();
-//        this.subscriptions = [];
     }
 
 
     /**
      * An internal utility function used by `validateListening`
      *
-     * @param {Action|Store} listenable The listenable we want to search for
-     * @returns {Boolean} The result of a recursive search among `this.subscriptions`
+     * @param {Publisher} listenable The listenable we want to search for
+     * @returns {boolean} The result of a recursive search among `this._subscriptions`
      */
     hasListener( listenable: Publisher ) : boolean {
-        var subs = this.subscriptions || [];
-        for (var i = 0; i < subs.length; ++i) {
-            var listenables = [].concat(subs[i].listenable);
-            for (var j = 0; j < listenables.length; ++j) {
-                var listener = listenables[j];
-                if (listener === listenable) {
-                    return true;
-                }
-                if (listener.hasListener && listener.hasListener(listenable)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        const pubs : Array< Publisher > = this._subscriptions
+            .reduce( ( r, sub ) => r.concat( sub.listenable ), [] );
+
+        // TODO: replace by .find one day, with a polyfill
+        return pubs.filter( pub => ( pub === listenable || ( pub.hasListener && pub.hasListener( listenable ) ) ) )
+                   .length > 0;
     }
 
 
@@ -54,43 +49,35 @@ export default class Listener extends Publisher {
     /**
      * Checks if the current context can listen to the supplied listenable
      *
-     * @param {Action|Store} listenable An Action or Store that should be
-     *  listened to.
-     * @returns {String|Undefined} An error message, or undefined if there was no problem.
+     * @param {Publisher} listenable An Action or Store that should be listened to.
      */
-    validateListening( listenable: Publisher ) : ?string {
-        if (listenable === this) {
-            return 'Listener is not able to listen to itself';
-        }
-        if (!_.isFunction(listenable.listen)) {
-            return `${listenable} is missing a listen method`;
-        }
-        if (listenable.hasListener && listenable.hasListener(this)) {
-            return 'Listener cannot listen to this listenable because of circular loop';
-        }
+    validateListening( listenable: Publisher | ActionFunctor ) {
+        invariant( listenable !== this, 'Listener is not able to listen to itself' );
+        invariant( typeof listenable.listen === 'function', 'listenable should be a Publisher' );
+        invariant( !(listenable.hasListener && listenable.hasListener(this)), 'Listener cannot listen to this listenable because of circular loop' );
     }
 
     /**
      * Sets up a subscription to the given listenable for the context object
      *
-     * @param {Action|Store} listenable An Action or Store that should be
-     *  listened to.
-     * @param {Function|String} callback The callback to register as event handler
-     * @param {Function|String} defaultCallback The callback to register as default handler
+     * @param {Publisher} listenable An Action or Store that should be listened to.
+     * @param {Function} callback The callback to register as event handler
+     * @param {Function} defaultCallback The callback to register as default handler
+     *
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
-    // TODO: deprecate the callback being a string
-    listenTo( listenable: Publisher, callback: Function, defaultCallback: ?Function ) : SubscriptionObj  {
-        _.throwIf( this.validateListening( listenable ) );
+    listenTo( listenable: Publisher | ActionFunctor, callback: Function, defaultCallback: ?Function ) : SubscriptionObj  {
+        this.validateListening( listenable );
+        invariant( callback != null, 'listenTo should be called with a valid callback' );
 
         if( !!defaultCallback )
             this.fetchInitialState( listenable, defaultCallback );
 
-        var desub = listenable.listen( callback, this );
+        var desub = listenable.listen( callback.bind( this ) );
         var unsubscriber = () => {
-            var index = this.subscriptions.indexOf(subscriptionObj);
-            _.throwIf( index === -1, 'Tried to remove listen already gone from subscriptions list!' );
-            this.subscriptions.splice( index, 1 );
+            var index = this._subscriptions.indexOf(subscriptionObj);
+            invariant( index >= 0, 'Tried to remove listen already gone from subscriptions list!' );
+            this._subscriptions.splice( index, 1 );
             desub();
         };
 
@@ -101,19 +88,17 @@ export default class Listener extends Publisher {
     /**
      * Stops listening to a single listenable
      *
-     * @param {Action|Store} listenable The action or store we no longer want to listen to
-     * @returns {Boolean} True if a subscription was found and removed, otherwise false.
+     * @param {Publisher} listenable The action or store we no longer want to listen to
+     * @returns {boolean} True if a subscription was found and removed, otherwise false.
      */
     stopListeningTo( listenable: Publisher ) : boolean {
-        var subs = this.subscriptions || [];
+        var subs = this._subscriptions || [];
 
-        // TODO: use lodash array find or something
-        for (var i = 0; i < subs.length; ++i) {
+        for( var i = 0; i < subs.length; ++i ) {
             var sub = subs[i];
             if( sub.listenable === listenable ) {
                 sub.stop();
-                _.throwIf(subs.indexOf(sub) !== -1,
-                        'Failed to remove listen from subscriptions list!');
+                invariant( subs.indexOf( sub ) === -1, 'Failed to remove listen from subscriptions list!' );
                 return true;
             }
         }
@@ -125,7 +110,7 @@ export default class Listener extends Publisher {
      */
     addSubscription( stop: () => void, listenable: Publisher ) : SubscriptionObj {
         const subscriptionObj : SubscriptionObj = { stop, listenable };
-        this.subscriptions.push( subscriptionObj );
+        this._subscriptions.push( subscriptionObj );
         return subscriptionObj;
     }
 
@@ -133,12 +118,10 @@ export default class Listener extends Publisher {
      * Removes a subscription
      */
     removeSubscription( subscription: SubscriptionObj ) {
-        for( var i = 0; i < this.subscriptions.length; ++i ) {
-            if( this.subscriptions[i] === subscription ) {
-                this.subscriptions.splice( i, 1 );
-                return true;
-            }
-        }
+        const index = this._subscriptions.indexOf( subscription );
+        if( index < 0 ) return;
+
+        this._subscriptions.splice( index, 1 );
     }
 
 
@@ -146,12 +129,12 @@ export default class Listener extends Publisher {
      * Stops all subscriptions and empties subscriptions array
      */
     stopListeningToAll() {
-        var subs = this.subscriptions || [];
-        var remaining;
-        while ((remaining = subs.length)) {
-            subs[0].stop();
-            _.throwIf(subs.length !== remaining - 1,
-                    'Failed to remove listen from subscriptions list!');
+        const subs = this._subscriptions || [];
+        var remaining : number = 0;
+
+        while( remaining = subs.length ) {
+            subs[ 0 ].stop();
+            invariant( subs.length === remaining - 1, 'Failed to remove listen from subscriptions list!' );
         }
     }
 
@@ -160,12 +143,11 @@ export default class Listener extends Publisher {
      * @param {Action|Store} listenable The publisher we want to get initial state from
      * @param {Function|String} defaultCallback The method to receive the data
      */
-     // TODO: deprecate the callback being a string
     fetchInitialState( listenable: Publisher, defaultCallback: Function ) {
         var self = this;
         if( _.isFunction(defaultCallback) && listenable.state ) {
             var data = listenable.state;
-            if (data && _.isFunction(data.then)) {
+            if( data && _.isFunction( data.then ) ) {
                 data.then(function() {
                     defaultCallback.apply(self, arguments);
                 });
@@ -221,11 +203,11 @@ export default class Listener extends Publisher {
     }
 
 
-    _createJoin( strategy: string, callback: Function, listenables: Array< Publisher > ) : SubscriptionObj {
-        _.throwIf( listenables.length < 2, 'Cannot create a join with less than 2 listenables!' );
+    _createJoin( strategy: JoinStrategies, callback: Function, listenables: Array< Publisher > ) : SubscriptionObj {
+        invariant( listenables.length >= 2, 'Cannot create a join with less than 2 listenables!' );
 
         // validate everything
-        listenables.forEach( ( listenable ) => _.throwIf( this.validateListening( listenable ) ) );
+        listenables.forEach( listenable => this.validateListening( listenable ) );
 
         const stop: Function = new Join( listenables, strategy ).listen( callback );
 
@@ -237,7 +219,7 @@ export default class Listener extends Publisher {
             }
         };
 
-        this.subscriptions.push( subobj );
+        this._subscriptions.push( subobj );
 
         return subobj;
     }
