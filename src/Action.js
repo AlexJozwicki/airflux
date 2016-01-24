@@ -1,7 +1,14 @@
 /* @flow */
-import Publisher from './Publisher';
+import Publisher                    from './Publisher';
+import type { UnsubscribeFunction } from './Publisher';
 
-export type Functor = Function;
+
+export type Functor = $All< Function, {
+    _isActionFunctor    : boolean;
+    action              : Action;
+    listen              : ( callback: ( x: any ) => ?Promise ) => UnsubscribeFunction;
+    listenOnce          : ( callback: ( x: any ) => ?Promise ) => UnsubscribeFunction;
+} >;
 
 type Children = { [key: string]: Action };
 
@@ -76,10 +83,9 @@ export default class Action extends Publisher {
             Object.defineProperty( functor, childName, { value: this.children[ childName ].asFunction } );
         });
 
-
         return functor;
     }
 
-    get eventType() : string { return 'event'; }
+    get eventLabel() : string { return 'event'; }
     get isAction()  : boolean { return true; }
 }

@@ -1,6 +1,8 @@
 /* @flow */
 import * as _ from './utils';
 
+export type UnsubscribeFunction = () => void;
+
 
 
 /**
@@ -8,19 +10,15 @@ import * as _ from './utils';
  */
 export default class Publisher {
     emitter            : any;
-    //children           : Array< any >;
-    _dispatchPromises  : Array< any >;
 
     /**
      * @protected
      */
     constructor() {
         this.emitter = new _.EventEmitter();
-        //this.children = [];
-        this._dispatchPromises = [];
     }
 
-    get eventType() : string { return 'event'; }
+    get eventLabel() : string { return 'event'; }
     get isPublisher() : boolean { return true; }
 
 
@@ -31,7 +29,7 @@ export default class Publisher {
      * undefined, that will be passed on as arguments for shouldEmit and
      * emission.
      */
-    preEmit() : ?Object {}
+    preEmit( args: any ) : ?Object {}
 
     /**
      * Hook used by the publisher after `preEmit` to determine if the
@@ -54,7 +52,7 @@ export default class Publisher {
      * @param {Mixed} [optional] bindContext The context to bind the callback with
      * @returns {Function} Callback that unsubscribes the registered event handler
      */
-    listen( callback: ( x: any ) => ?Promise, bindContext: any ) : Function {
+    listen( callback: ( x: any ) => ?Promise, bindContext: any ) : UnsubscribeFunction {
         var aborted = false;
         bindContext = bindContext || this;
 
@@ -62,16 +60,16 @@ export default class Publisher {
             if( aborted ) return;
             this.processResult( callback.apply( bindContext, args ) );
         };
-        this.emitter.addListener( this.eventType, eventHandler );
+        this.emitter.addListener( this. eventLabel, eventHandler );
 
         return () => {
             aborted = true;
-            this.emitter.removeListener( this.eventType, eventHandler );
+            this.emitter.removeListener( this. eventLabel, eventHandler );
         };
     }
 
 
-    listenOnce( callback: Function, bindContext: any ) : Function {
+    listenOnce( callback: Function, bindContext: any ) : UnsubscribeFunction {
         bindContext = bindContext || this;
         var unsubscribe = this.listen( () => {
             var args = Array.prototype.slice.call(arguments);
@@ -84,8 +82,7 @@ export default class Publisher {
     /**
      * Publishes an event using `this.emitter` (if `shouldEmit` agrees)
      */
-    triggerSync() {
-        var args = arguments;
+    triggerSync( ...args: any ) {
         var preResult = this.preEmit.apply( this, args );
         if( typeof preResult !== 'undefined' ) {
             args = _.isArguments(preResult) ? preResult : [].concat(preResult);
@@ -93,15 +90,14 @@ export default class Publisher {
 
         if( this.shouldEmit.apply( this, args ) ) {
             this._dispatchPromises = [];
-            this.emitter.emit( this.eventType, args );
+            this.emitter.emit( this. eventLabel, args );
         }
     }
 
     /**
      * Tries to publish the event on the next tick
      */
-    trigger() {
-        const args = arguments;
+    trigger( ...args: any ) {
         _.nextTick( () => this.triggerSync.apply( this, args ) );
     }
 }

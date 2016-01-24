@@ -12,7 +12,7 @@ export default class Store< State > extends Listener {
         super();
     }
 
-    get eventType() : string { return 'change'; }
+    get eventLabel() : string { return 'change'; }
 
     /**
      * Publishes the state to all subscribers.

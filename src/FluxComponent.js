@@ -15,6 +15,10 @@ type ListenToStore = {
 };
 
 
+
+/**
+ * React Component decorator
+ */
 export default function FluxComponent( target: Function ) {
     var clazz = target.prototype;
 
