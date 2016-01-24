@@ -1,6 +1,7 @@
 /* @flow */
 import * as _ from './utils';
 
+export type UnsubscribeFunction = () => void;
 
 
 /**
@@ -50,21 +51,13 @@ export default class Publisher {
      * @param {Mixed} [optional] bindContext The context to bind the callback with
      * @returns {Function} Callback that unsubscribes the registered event handler
      */
-    listen( callback: Function, bindContext: any ) : Function {
+    listen( callback: ( x: any ) => ?Promise ) : UnsubscribeFunction {
         var aborted = false;
-        bindContext = bindContext || this;
 
         var eventHandler = ( args ) => {
-            if( aborted ) {
-                // This state is achieved when one listener removes another.
-                //   It might be considered a bug of EventEmitter2 which makes
-                //   a snapshot of the listener list before looping through them
-                //   and effectively ignores calls to removeListener() during emit.
-                // TODO: Needs a test.
-                return;
-            }
+            if( aborted ) return;
 
-            const result : ?Promise = callback.apply( bindContext, args );
+            const result : ?Promise = callback.apply( this, args );
 
             if (_.isPromise(result)) {
                 // Note: To support mixins, we need to access the method this way.
