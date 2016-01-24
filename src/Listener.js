@@ -50,29 +50,6 @@ export default class Listener extends Publisher {
     }
 
 
-    /**
-     * A convenience method that listens to all listenables in the given object.
-     *
-     * @param {Object} listenables An object of listenables. Keys will be used as callback method names.
-     */
-    listenToMany( listenables: { [key: string]: Publisher } ) {
-        var allListenables = flattenListenables( listenables );
-        for (var key in allListenables) {
-            var cbname = _.callbackName(key);
-            // $FlowComputedProperty
-            var localname = this[cbname] ? cbname : this[key] ? key : undefined;
-            if (localname) {
-                var callback = (
-                    // $FlowComputedProperty
-                    this[cbname + 'Default'] ||
-                    // $FlowComputedProperty
-                    this[localname + 'Default'] ||
-                    localname
-                );
-                this.listenTo(allListenables[key], localname, callback);
-            }
-        }
-    }
 
     /**
      * Checks if the current context can listen to the supplied listenable
@@ -103,15 +80,14 @@ export default class Listener extends Publisher {
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
     // TODO: deprecate the callback being a string
-    listenTo( listenable: Publisher, callback: Function | string, defaultCallback: ?(Function | string) ) : SubscriptionObj  {
+    listenTo( listenable: Publisher, callback: Function, defaultCallback: ?Function ) : SubscriptionObj  {
         _.throwIf( this.validateListening( listenable ) );
 
         if( !!defaultCallback )
             this.fetchInitialState( listenable, defaultCallback );
 
         var subs = this.subscriptions;
-        // $FlowComputedProperty
-        var desub = listenable.listen( this[callback] || callback, this );
+        var desub = listenable.listen( callback, this );
         var unsubscriber = function () {
             var index = subs.indexOf(subscriptionObj);
             _.throwIf(index === -1,
@@ -189,15 +165,9 @@ export default class Listener extends Publisher {
      * @param {Function|String} defaultCallback The method to receive the data
      */
      // TODO: deprecate the callback being a string
-    fetchInitialState( listenable: Publisher, defaultCallback: Function | string ) {
-        //const callback: Function = typeof defaultCallback === 'string' ? this[defaultCallback] : defaultCallback;
-        if (typeof defaultCallback === 'string') {
-            // $FlowComputedProperty
-            defaultCallback = this[defaultCallback];
-        }
-
+    fetchInitialState( listenable: Publisher, defaultCallback: Function ) {
         var self = this;
-        if (_.isFunction(defaultCallback) && listenable.state ) {
+        if( _.isFunction(defaultCallback) && listenable.state ) {
             var data = listenable.state;
             if (data && _.isFunction(data.then)) {
                 data.then(function() {
@@ -276,52 +246,3 @@ export default class Listener extends Publisher {
         return subobj;
     }
 }
-
-
-
-
-/**
- * Extract child listenables from a parent from their
- * children property and return them in a keyed Object
- *
- * @param {Object} listenable The parent listenable
- */
-var mapChildListenables = function( listenable: Publisher ) {
-    var children = {};
-
-    var childListenables = listenable.children || [];
-    for (var i = 0; i < childListenables.length; ++i) {
-        var childName = childListenables[i];
-        if (listenable[childName]) {
-            children[childName] = listenable[childName];
-        }
-    }
-
-    return children;
-};
-
-/**
- * Make a flat dictionary of all listenables including their
- * possible children (recursively), concatenating names in camelCase.
- *
- * @param {Object} listenables The top-level listenables
- */
-var flattenListenables = function( listenables : { [key: string]: Publisher } ) {
-    var flattened = {};
-    for (var key in listenables) {
-        var listenable: Publisher = listenables[key];
-        var childMap = mapChildListenables(listenable);
-
-        // recursively flatten children
-        var children = flattenListenables(childMap);
-
-        // add the primary listenable and chilren
-        flattened[key] = listenable;
-        for (var childKey in children) {
-            var childListenable = children[childKey];
-            flattened[key + _.capitalize(childKey)] = childListenable;
-        }
-    }
-
-    return flattened;
-};

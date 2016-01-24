@@ -2,10 +2,12 @@ var chai    = require('chai');
 var assert  = chai.assert;
 
 
-import Action       from '../src/Action';
-import SyncAction   from '../src/SyncAction';
-import Store        from '../src/Store';
-import Listener     from '../src/Listener';
+import Action               from '../src/Action';
+import AsyncResultAction    from '../src/AsyncResultAction';
+import PromiseAction        from '../src/PromiseAction';
+import SyncAction           from '../src/SyncAction';
+import Store                from '../src/Store';
+import Listener             from '../src/Listener';
 
 
 //var sinon   = require('sinon');
@@ -33,7 +35,7 @@ describe('Creating action', function() {
     });
 
     it("should create completed and failed child actions for async actions",function(){
-        var action = new Action().asyncResult();
+        var action = new AsyncResultAction();
 
         assert.instanceOf( action.completed, Action);
         assert.instanceOf( action.failed, Action );
@@ -48,7 +50,7 @@ describe('Creating action', function() {
     });
 
     it("should create a functor returning a Promise-like for Action with async results",function(){
-        var action = new Action().asyncResult( () => new Promise( ( resolve ) => setTimeout( resolve, 500 ) ) );
+        var action = new PromiseAction( () => new Promise( ( resolve ) => setTimeout( resolve, 500 ) ) );
         var functor = action.asFunction;
         var spy = sinon.spy();
         functor().then( spy );
@@ -57,7 +59,7 @@ describe('Creating action', function() {
     });
 
     it("should add completed and failed child functors on the functor of async actions",function(){
-        var functor = new Action().asyncResult().asFunction;
+        var functor = new AsyncResultAction().asFunction;
 
         assert.isFunction( functor.completed );
         assert.isFunction( functor.failed );
@@ -225,7 +227,7 @@ describe('Creating actions with children to an action definition object', functi
 
     beforeEach(function () {
         actions = {
-            foo: new Action().asyncResult(),
+            foo: new AsyncResultAction(),
             bar: new Action().withChildren( ['baz'] )
         };
     });
@@ -281,15 +283,8 @@ describe('Creating actions with children to an action definition object', functi
         var promise;
 
         beforeEach(function() {
-            // promise resolves on foo.completed
-            promise = new Promise(function(resolve) {
-                actions.foo.completed.listen(function(){
-                    resolve.apply(null, arguments);
-                }, {}); // pass empty context
-            });
-
             // listen for foo and return a promise
-            actions.foo.listen(function() {
+            actions.promisedFoo = new PromiseAction( function() {
                 var args = Array.prototype.slice.call(arguments, 0);
 
                 var p = new Promise( function( resolve ) {
@@ -300,11 +295,18 @@ describe('Creating actions with children to an action definition object', functi
 
                 return p;
             });
+
+            // promise resolves on foo.completed
+            promise = new Promise(function(resolve) {
+                actions.promisedFoo.completed.listen(function(){
+                    resolve.apply(null, arguments);
+                }, {}); // pass empty context
+            });
         });
 
         it('should invoke the completed action with the correct arguments', function() {
             var testArgs = [1337, 'test'];
-            actions.foo.trigger( testArgs[0], testArgs[1] );
+            actions.promisedFoo.trigger( testArgs[0], testArgs[1] );
 
             return assert.eventually.deepEqual(promise, testArgs);
         });

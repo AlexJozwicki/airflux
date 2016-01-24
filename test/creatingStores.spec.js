@@ -205,7 +205,7 @@ describe('Creating stores', () => {
         });
 
     });
-
+/*
     describe("the listenToMany method",function(){
         describe("when given a single object",function(){
             var initialbarstate = "DEFAULTBARDATA",
@@ -264,7 +264,7 @@ describe('Creating stores', () => {
             });
         });
     });
-
+*/
 
     describe('getters', function() {
         var didRun = false;

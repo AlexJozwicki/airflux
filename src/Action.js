@@ -5,12 +5,12 @@ export type Functor = Function;
 
 type Children = { [key: string]: Action };
 
+
 /**
  * @abstract
  */
 export default class Action extends Publisher {
-    children: Children;
-
+    children    : Children;
 
     constructor() {
         super();
@@ -20,27 +20,6 @@ export default class Action extends Publisher {
     get sync() : boolean { return false; }
 
 
-    /**
-     * Transforms the action into one returning an asynchronous result.
-     * This will create two children actions:
-     * - completed
-     * - failed
-     *
-     * If the listen function returns a Promise, the Promise will be automatically mapped onto these two children actions.
-     */
-    asyncResult( listenFunction: ?Function = void 0 ) : Action {
-        this.children.completed = new Action();
-        Object.defineProperty( this, 'completed', { value: this.children.completed } );
-
-        this.children.failed = new Action();
-        Object.defineProperty( this, 'failed', { value: this.children.failed } );
-
-        if( typeof listenFunction === 'function' ) {
-            this.listen( listenFunction );
-        }
-
-        return this;
-    }
 
 
     /**
@@ -67,21 +46,21 @@ export default class Action extends Publisher {
      * Returns a synchronous function to trigger the action
      */
     get asSyncFunction() : Functor {
-        return this._createFunctor( this.triggerSync );
+        return this.createFunctor( this.triggerSync );
     }
 
     /**
     * Returns a function to trigger the action, async or sync depending on the action definition.
      */
     get asFunction() : Functor {
-        return this._createFunctor( this.canHandlePromise() ? this.triggerPromise : this.trigger );
+        return this.createFunctor( this.trigger );
     }
 
 
     /**
      *
      */
-    _createFunctor( triggerFn: Function ) : Functor {
+    createFunctor( triggerFn: Function ) : Functor {
         var functor = triggerFn.bind( this );
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );

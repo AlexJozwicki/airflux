@@ -1,4 +1,6 @@
-import Action from './Action';
+/* @flow */
+import Action               from './Action';
+import type { Functor }     from './Action';
 
 
 export default class SyncAction extends Action {
@@ -9,6 +11,6 @@ export default class SyncAction extends Action {
     get sync() : boolean { return true; }
 
     get asFunction() : Functor {
-        return this._createFunctor( this.triggerSync );
+        return this.createFunctor( this.triggerSync );
     }
 }
