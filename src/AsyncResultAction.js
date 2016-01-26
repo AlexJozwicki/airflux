@@ -19,4 +19,29 @@ export default class AsyncResultAction extends Action {
             this.listen( listenFunction );
         }
     }
+
+    /**
+     * Returns a Promise for the triggered action
+     */
+    triggerPromise() : Promise {
+        const args = arguments;
+
+        const promise = new Promise( ( resolve, reject ) => {
+            var removeSuccess = this.completed.listen( ( args ) => {
+                removeSuccess();
+                removeFailed();
+                resolve( args );
+            });
+
+            var removeFailed = this.failed.listen( ( args ) => {
+                removeSuccess();
+                removeFailed();
+                reject( args );
+            });
+
+            this.trigger.apply( this, args );
+        });
+
+        return promise;
+    }
 }

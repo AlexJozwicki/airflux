@@ -49,11 +49,10 @@ export default class Publisher {
     /**
      * Subscribes the given callback for action triggered
      *
-     * @param {Function} callback The callback to register as event handler
-     * @param {Mixed} [optional] bindContext The context to bind the callback with
-     * @returns {Function} Callback that unsubscribes the registered event handler
+     * @param {( x: any ) => ?any} callback The callback to register as event handler
+     * @returns {UnsubscribeFunction} Callback that unsubscribes the registered event handler
      */
-    listen( callback: ( x: any ) => ?Promise ) : UnsubscribeFunction {
+    listen( callback: ( x: any ) => ?any ) : UnsubscribeFunction {
         invariant( typeof callback === 'function', 'listen has to be given a valid callback function' );
 
         var aborted = false;
@@ -62,6 +61,7 @@ export default class Publisher {
             if( aborted ) return;
             this.processResult( callback.apply( this, args ) );
         };
+
         this.emitter.addListener( this.eventLabel, eventHandler );
 
         return () => {
@@ -71,14 +71,13 @@ export default class Publisher {
     }
 
 
-    listenOnce( callback: Function, bindContext: any ) : UnsubscribeFunction {
+    listenOnce( callback: ( x: any ) => ?any ) : UnsubscribeFunction {
         invariant( typeof callback === 'function', 'listenOnce has to be given a valid callback function' );
 
-        bindContext = bindContext || this;
         var unsubscribe = this.listen( () => {
             var args = Array.prototype.slice.call(arguments);
             unsubscribe();
-            return callback.apply( bindContext, args );
+            return callback.apply( this, args );
         });
         return unsubscribe;
     }

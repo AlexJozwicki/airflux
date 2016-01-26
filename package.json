@@ -8,8 +8,8 @@
     "lib",
     "commonjs2"
   ],
-  "main": "lib/index",
-  "jsnext:main": "es6/index",
+  "main": "lib/index.js",
+  "jsnext:main": "es6/index.js",
   "scripts": {
     "build": "npm run build-cjs && npm run build-es6 && npm run build-umd",
     "build-cjs": "rimraf lib && babel ./src -d lib --ignore '__tests__'",

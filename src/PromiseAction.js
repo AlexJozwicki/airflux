@@ -9,9 +9,6 @@ export type PromiseFunctor = $All< ActionFunctor, {
 
 
 export default class PromiseAction extends AsyncResultAction {
-    completed   : Action;
-    failed      : Action;
-
     constructor( listenFunction: Function ) {
         super( listenFunction );
     }
@@ -26,34 +23,7 @@ export default class PromiseAction extends AsyncResultAction {
     processResult( promise: ?Promise ) {
         if( !( promise instanceof Promise ) ) return;
 
-        // TODO: test a multiple response
-        promise.then( ( ...response ) => this.completed.trigger( ...response ), ( ...error ) => this.failed.asFunction( ...error ) );
+        promise.then( ( ...response ) => this.completed.trigger( ...response ) ).catch( ( ...error ) => this.failed.asFunction( ...error ) );
     }
 
-
-
-    /**
-     * Returns a Promise for the triggered action
-     */
-    triggerPromise() : Promise {
-        const args = arguments;
-
-        const promise = new Promise( ( resolve, reject ) => {
-            var removeSuccess = this.completed.listen( ( args ) => {
-                removeSuccess();
-                removeFailed();
-                resolve( args );
-            });
-
-            var removeFailed = this.failed.listen( ( args ) => {
-                removeSuccess();
-                removeFailed();
-                reject( args );
-            });
-
-            this.trigger.apply( this, args );
-        });
-
-        return promise;
-    }
 }
