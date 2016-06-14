@@ -8,6 +8,11 @@ export type PromiseFunctor = $All< ActionFunctor, {
 } >;
 
 
+
+/**
+ * @example
+ *   new PromiseAction( () => fetch( '/url' ) )
+ */
 export default class PromiseAction extends AsyncResultAction {
     constructor( listenFunction: Function ) {
         super( listenFunction );

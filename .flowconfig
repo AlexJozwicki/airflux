@@ -5,6 +5,7 @@
 .*/node_modules/fbjs/*
 .*/node_modules/babel.*
 .*/node_modules/babylon.*
+.*/node_modules/npm/.*
 
 [include]
 ./src
@@ -26,4 +27,4 @@ suppress_comment= \\(.\\|\n\\)*\\$FlowComputedProperty
 suppress_comment= \\(.\\|\n\\)*\\$FlowDynamicTypeCheckBug
 
 [version]
-0.20.1
+0.25.0

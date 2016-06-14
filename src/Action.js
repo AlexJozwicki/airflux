@@ -27,8 +27,6 @@ export default class Action extends Publisher {
     get sync() : boolean { return false; }
 
 
-
-
     /**
      * Creates children actions
      */

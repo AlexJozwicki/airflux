@@ -1,3 +1,62 @@
+# 0.6.0
+
+In order to be Flow compliant, the previous Action class was split into:
+- Action
+- AsyncResultAction
+- PhantomStore
+
+Also, please note that from now, when importing `airflux`, you will by default import the ES6 version.
+You will therefore have to configure your webpack/babel in order to babelify airflux as well.
+Alternatively, you can import the ES5 version with :
+
+```javascript
+import * as airflux from 'airflux/es5';
+```
+
+
+## AsyncResultAction
+
+AsyncResultAction is now a specific type of Action, which has a AsyncResult, and therefore has a `completed` and `failed` functors.
+This replaces the modifier `asyncResult()` we previously had after creating the action.
+
+## PromiseAction
+
+PromiseAction is a specific case of AsyncResultAction, which takes a functor returning a Promise. The promise will be mapped directly onto the `completed` and
+`failed` functors.
+This replaces the previous argument of `asyncResult( () => promise )`.
+
+## PhantomStore
+
+To avoid processing promises inside a React component, and possibly having errors if the promise is resolved after the component is unmounted, we have now
+a helper for a `PhantomStore`.
+This type of store is not shared between components, but is specific to each instance of a component, proxying the promise resolution.
+
+```javascript
+@FluxComponent
+class MyComponent extends React.Component {
+    constructor( props ) {
+        super( props );
+        this.connectStore( new PhantomStore( () => fetch( '/url' ), arg1, arg2 ), 'stateKey' );
+    }
+}
+```
+
+## Migration guide
+
+```javascript
+
+// 0.5
+const action        = new Action();
+const asyncAction   = new Action().asyncResult();
+const promiseAction = new Action().asyncResult( () => fetch( '/url' ) );
+
+// 0.6
+const action        = new Action();
+const asyncAction   = new AsyncResultAction();
+const promiseAction = new PromiseAction( () => fetch( '/url' ) );
+
+```
+
 # 0.5.0
 
 Big revamp to support more ES6 syntax, Flow.
@@ -58,7 +117,7 @@ import { Action, FluxComponent } from 'airflux';
 const action = new Action().asFunction;
 
 @FluxComponent
-class YourComponent extends Component {
+class YourComponent extends React.Component {
     constructor( props ) {
         super( props );
         this.listenTo( action, this.actionHandler );
@@ -71,7 +130,7 @@ class YourComponent extends Component {
     }
 
     storeCallback( storeState ) {
-        
+
     }
 }
 ```
