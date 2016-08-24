@@ -1,7 +1,6 @@
 [ignore]
-.*/es5/.*
-.*/es6/.*
-.*/lib/.*
+./es6/.*
+./lib/.*
 .*/react/node_modules/.*
 .*/node_modules/fbjs/*
 .*/node_modules/babel.*
@@ -28,4 +27,4 @@ suppress_comment= \\(.\\|\n\\)*\\$FlowComputedProperty
 suppress_comment= \\(.\\|\n\\)*\\$FlowDynamicTypeCheckBug
 
 [version]
-0.29.0
+0.25.0

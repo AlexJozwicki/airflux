@@ -1,8 +1,6 @@
 /* @flow */
-import AsyncResultAction from './AsyncResultAction';
-import Store from './Store';
-import FluxComponent from './FluxComponent';
-export { default as FluxComponent } from './FluxComponent';
+import { Action, Store, FluxComponent } from 'airflux';
+export { FluxComponent };
 
 
 /**
@@ -14,15 +12,17 @@ export { default as FluxComponent } from './FluxComponent';
  *   this.connectStore( new PhantomStore( () => fetch( '/url' ), arg1, arg2 ), 'stateKey' );
  *
  */
-export default class PhantomStore< T > extends Store< T > {
+export default class PhantomStore extends Store< T > {
+    state: T = null;
+
     /**
      *
      * @param  {Function}   promiseFunctor      the function returning a Promise, to wrap
      * @param  {...}        args                arguments to be passed to the function, when called.
      */
-    constructor( promiseFunctor: () => Promise< T >, ...args: Array< any > ) {
+    constructor( promiseFunctor: () => Promise, ...args ) {
         super();
-        const action = new AsyncResultAction( promiseFunctor ).asFunction;
+        const action = new Action().asyncResult( promiseFunctor ).asFunction;
         this.listenTo( action.completed, res => {
             this.state = res;
             this.publishState();

@@ -2,7 +2,6 @@
 import Listener         from './Listener';
 import type Publisher   from './Publisher';
 import type Store       from './Store';
-import type Action      from './Action';
 
 
 type ListenToPublisher = {
@@ -11,7 +10,7 @@ type ListenToPublisher = {
 };
 
 type ListenToStore = {
-    store       : Store< * >;
+    store       : Store;
     stateKey    : string;
 };
 
@@ -67,7 +66,7 @@ export default function FluxComponent( target: Function ) {
      * @param  {Store} store
      * @param  {string} stateKey
      */
-    clazz.__listenToStore = function( store: Store< * >, stateKey: string ) {
+    clazz.__listenToStore = function( store: Store, stateKey: string ) {
         this.__listener.listenTo( store, ( value ) => this.setState( { [stateKey]: value } ) );
     }
 
@@ -85,7 +84,7 @@ export default function FluxComponent( target: Function ) {
      * @param  {Store} store        the store to listen to
      * @param  {string} stateKey    the key in the state of the component where the state of the store will be put
      */
-    clazz.connectStore = function( store: Store< * >, stateKey: string ) {
+    clazz.connectStore = function( store: Store, stateKey: string ) {
         this.__stores = this.__stores || [];
         this.__stores.push( { store, stateKey } );
     };

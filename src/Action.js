@@ -3,24 +3,20 @@ import Publisher                    from './Publisher';
 import type { UnsubscribeFunction } from './Publisher';
 
 
-export type ActionFunctor< Fn > = $All< Fn, {
+export type ActionFunctor = $All< Function, {
     _isActionFunctor    : boolean;
-    action              : $Subtype< Action< Fn > >;
-    listen              : ( callback: ( x: any ) => ?Promise< * > ) => UnsubscribeFunction;
-    listenOnce          : ( callback: ( x: any ) => ?Promise< * > ) => UnsubscribeFunction;
+    action              : Action;
+    listen              : ( callback: ( x: any ) => ?Promise ) => UnsubscribeFunction;
+    listenOnce          : ( callback: ( x: any ) => ?Promise ) => UnsubscribeFunction;
 } >;
 
-type Children = { [key: string]: Action< any > };
-
-
-
-
+type Children = { [key: string]: Action };
 
 
 /**
  * @abstract
  */
-export default class Action< Fn > extends Publisher {
+export default class Action extends Publisher {
     children    : Children;
 
     constructor() {
@@ -28,11 +24,13 @@ export default class Action< Fn > extends Publisher {
         this.children = {};
     }
 
+    get sync() : boolean { return false; }
+
 
     /**
      * Creates children actions
      */
-    withChildren( children: Array< Children | string > ) : Action< Fn > {
+    withChildren( children: Array< Children | string > ) : Action {
         children.forEach( ( child ) => {
             if( typeof child === 'string' ) {
                 let action = new Action();
@@ -50,18 +48,25 @@ export default class Action< Fn > extends Publisher {
 
 
     /**
+     * Returns a synchronous function to trigger the action
+     */
+    get asSyncFunction() : ActionFunctor {
+        return this.createFunctor( this.triggerSync );
+    }
+
+    /**
     * Returns a function to trigger the action, async or sync depending on the action definition.
      */
-    get asFunction() : $Shape< ActionFunctor< Fn > > {
-        return this.createFunctor();
+    get asFunction() : ActionFunctor {
+        return this.createFunctor( this.trigger );
     }
 
 
     /**
      *
      */
-    createFunctor() : $Shape< ActionFunctor< Fn > > {
-        var functor = ( ...args: Array< * > ) => this.trigger( ...args );
+    createFunctor( triggerFn: Function ) : ActionFunctor {
+        var functor = triggerFn.bind( this );
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );
         Object.defineProperty( functor, 'action', { value: this } );
