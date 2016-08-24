@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.FluxComponent = exports.Joins = exports.Store = exports.Publisher = exports.SyncAction = exports.PromiseAction = exports.AsyncResultAction = exports.Action = undefined;
+exports.Capacitor = exports.FluxComponent = exports.Joins = exports.Store = exports.Publisher = exports.SyncAction = exports.PromiseAction = exports.AsyncResultAction = exports.Action = undefined;
 
 var _Action2 = require('./Action');
 
@@ -37,6 +37,10 @@ var _FluxComponent2 = require('./FluxComponent');
 
 var _FluxComponent3 = _interopRequireDefault(_FluxComponent2);
 
+var _Capacitor2 = require('./Capacitor');
+
+var _Capacitor3 = _interopRequireDefault(_Capacitor2);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
@@ -49,3 +53,4 @@ exports.Publisher = _Publisher3.default;
 exports.Store = _Store3.default;
 exports.Joins = _Joins;
 exports.FluxComponent = _FluxComponent3.default;
+exports.Capacitor = _Capacitor3.default;

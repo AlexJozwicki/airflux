@@ -47,7 +47,6 @@ var PromiseAction = (function (_AsyncResultAction) {
             var _this2 = this;
 
             if (!(promise instanceof Promise)) return;
-
             promise.then(function () {
                 var _completed;
 

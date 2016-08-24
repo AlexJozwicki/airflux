@@ -20,7 +20,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 /**
- * @abstract
+ *
  */
 
 var Action = (function (_Publisher) {
@@ -35,12 +35,12 @@ var Action = (function (_Publisher) {
         return _this;
     }
 
+    /**
+     * Creates children actions
+     */
+
     _createClass(Action, [{
         key: 'withChildren',
-
-        /**
-         * Creates children actions
-         */
         value: function withChildren(children) {
             var _this2 = this;
 
@@ -87,11 +87,6 @@ var Action = (function (_Publisher) {
             });
 
             return functor;
-        }
-    }, {
-        key: 'sync',
-        get: function get() {
-            return false;
         }
     }, {
         key: 'asSyncFunction',

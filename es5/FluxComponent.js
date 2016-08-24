@@ -17,6 +17,10 @@ var _Store = require('./Store');
 
 var _Store2 = _interopRequireDefault(_Store);
 
+var _Action = require('./Action');
+
+var _Action2 = _interopRequireDefault(_Action);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }

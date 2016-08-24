@@ -13,8 +13,9 @@ export type ActionFunctor = $All< Function, {
 type Children = { [key: string]: Action };
 
 
+
 /**
- * @abstract
+ *
  */
 export default class Action extends Publisher {
     children    : Children;
@@ -23,9 +24,6 @@ export default class Action extends Publisher {
         super();
         this.children = {};
     }
-
-    get sync() : boolean { return false; }
-
 
     /**
      * Creates children actions
@@ -50,14 +48,14 @@ export default class Action extends Publisher {
     /**
      * Returns a synchronous function to trigger the action
      */
-    get asSyncFunction() : ActionFunctor {
+    get asSyncFunction() : any {
         return this.createFunctor( this.triggerSync );
     }
 
     /**
     * Returns a function to trigger the action, async or sync depending on the action definition.
      */
-    get asFunction() : ActionFunctor {
+    get asFunction() : any {
         return this.createFunctor( this.trigger );
     }
 
@@ -65,7 +63,7 @@ export default class Action extends Publisher {
     /**
      *
      */
-    createFunctor( triggerFn: Function ) : ActionFunctor {
+    createFunctor( triggerFn: Function ) : any {
         var functor = triggerFn.bind( this );
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );

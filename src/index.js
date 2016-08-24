@@ -6,3 +6,4 @@ export Publisher            from './Publisher';
 export Store                from './Store';
 export * as Joins           from './JoinStores';
 export FluxComponent        from './FluxComponent';
+export Capacitor            from './Capacitor';

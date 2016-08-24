@@ -22,6 +22,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var AsyncResultAction = (function (_Action) {
     _inherits(AsyncResultAction, _Action);
 
+    //_listenFunction : Fn;
+
     function AsyncResultAction(listenFunction) {
         _classCallCheck(this, AsyncResultAction);
 
@@ -29,6 +31,7 @@ var AsyncResultAction = (function (_Action) {
 
         _this.children.completed = new _Action3.default();
         _this.children.failed = new _Action3.default();
+        //this._listenFunction = listenFunction;
 
         Object.defineProperty(_this, 'completed', { value: _this.children.completed });
         Object.defineProperty(_this, 'failed', { value: _this.children.failed });
@@ -39,34 +42,56 @@ var AsyncResultAction = (function (_Action) {
         return _this;
     }
 
-    /**
-     * Returns a Promise for the triggered action
-     */
-
     _createClass(AsyncResultAction, [{
+        key: 'processResult',
+        value: function processResult(promise) {
+            var _this2 = this;
+
+            if (!(promise instanceof Promise)) return;
+            promise.then(function () {
+                var _completed;
+
+                return (_completed = _this2.completed).trigger.apply(_completed, arguments);
+            }).catch(function () {
+                var _failed;
+
+                return (_failed = _this2.failed).asFunction.apply(_failed, arguments);
+            });
+        }
+
+        /**
+         * Returns a Promise for the triggered action
+         */
+
+    }, {
         key: 'triggerPromise',
         value: function triggerPromise() {
-            var _this2 = this;
+            var _this3 = this;
 
             var args = arguments;
 
             var promise = new Promise(function (resolve, reject) {
-                var removeSuccess = _this2.completed.listen(function (args) {
+                var removeSuccess = _this3.completed.listen(function (args) {
                     removeSuccess();
                     removeFailed();
                     resolve(args);
                 });
 
-                var removeFailed = _this2.failed.listen(function (args) {
+                var removeFailed = _this3.failed.listen(function (args) {
                     removeSuccess();
                     removeFailed();
                     reject(args);
                 });
 
-                _this2.trigger.apply(_this2, args);
+                _this3.trigger.apply(_this3, args);
             });
 
             return promise;
+        }
+    }, {
+        key: 'asFunction',
+        get: function get() {
+            return this.createFunctor(this.triggerPromise);
         }
     }]);
 
