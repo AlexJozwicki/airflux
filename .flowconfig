@@ -27,4 +27,4 @@ suppress_comment= \\(.\\|\n\\)*\\$FlowComputedProperty
 suppress_comment= \\(.\\|\n\\)*\\$FlowDynamicTypeCheckBug
 
 [version]
-0.25.0
+0.29.0
