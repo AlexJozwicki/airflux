@@ -25,10 +25,8 @@ export default class PromiseAction extends AsyncResultAction {
         return this.createFunctor( this.triggerPromise );
     }
 
-    processResult( promise: ?Promise ) {
+    processResult( promise: ?Promise< * > ) {
         if( !( promise instanceof Promise ) ) return;
-
         promise.then( ( ...response ) => this.completed.trigger( ...response ) ).catch( ( ...error ) => this.failed.asFunction( ...error ) );
     }
-
 }

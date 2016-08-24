@@ -6,8 +6,8 @@ import type { UnsubscribeFunction } from './Publisher';
 export type ActionFunctor = $All< Function, {
     _isActionFunctor    : boolean;
     action              : Action;
-    listen              : ( callback: ( x: any ) => ?Promise ) => UnsubscribeFunction;
-    listenOnce          : ( callback: ( x: any ) => ?Promise ) => UnsubscribeFunction;
+    listen              : ( callback: ( x: any ) => ?Promise< * > ) => UnsubscribeFunction;
+    listenOnce          : ( callback: ( x: any ) => ?Promise< * > ) => UnsubscribeFunction;
 } >;
 
 type Children = { [key: string]: Action };

@@ -23,7 +23,7 @@ export default class AsyncResultAction extends Action {
     /**
      * Returns a Promise for the triggered action
      */
-    triggerPromise() : Promise {
+    triggerPromise() : Promise< * > {
         const args = arguments;
 
         const promise = new Promise( ( resolve, reject ) => {

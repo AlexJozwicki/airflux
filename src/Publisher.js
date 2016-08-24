@@ -44,7 +44,7 @@ export default class Publisher {
     /**
      * @abstract
      */
-    processResult( result: ?Promise ) {}
+    processResult( result: ?Promise< * > ) {}
 
     /**
      * Subscribes the given callback for action triggered
