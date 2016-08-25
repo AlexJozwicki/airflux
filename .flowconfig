@@ -21,6 +21,7 @@ unsafe.enable_getters_and_setters=true
 esproposal.decorators=ignore
 esproposal.class_static_fields=ignore
 esproposal.class_instance_fields=ignore
+esproposal.export_star_as=enable
 
 suppress_comment= \\(.\\|\n\\)*\\$IgnoreFlow
 suppress_comment= \\(.\\|\n\\)*\\$FlowPrototypeDecl
