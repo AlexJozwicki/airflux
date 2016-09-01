@@ -3,6 +3,9 @@ import Listener from './Listener';
 
 export type StateMutation< State > = ( x: State ) => State;
 
+
+
+
 /**
  */
 export default class Store< State > extends Listener {
@@ -22,11 +25,11 @@ export default class Store< State > extends Listener {
         super.trigger( this.state );
     }
 
-    setState( transform: ?StateMutation< State > = null ) {
-        if( !!transform ) {
-            this.state = transform( this.state );
+    setState( partialState: $Shape< State >, callback?: () => void ) {
+        this.state = { ...this.state, partialState };
+        this.publishState();
+        if( typeof callback === 'function' ) {
+            callback();
         }
-
-        super.trigger( this.state );
     }
 }
