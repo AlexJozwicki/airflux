@@ -5,13 +5,18 @@ import Action from './Action';
 
 
 
-export default class AsyncResultAction< T, Fn: (...args: Array< any > ) => Promise< T > > extends Action {
-    completed       : Action;
-    failed          : Action;
+export default class AsyncResultAction< T, Fn: (...args: Array< any > ) => Promise< T > > extends Action< Fn > {
+    completed       : Action< ( x: T ) => any >;
+    failed          : Action< any >;
     //_listenFunction : Fn;
 
-    constructor( listenFunction: Fn ) {
-        super();
+    /**
+     * By default we create this type of action as synchronous.
+     * If the action is returning a Promise, it's safe to consider that most of the time the action itself is quite simple,
+     * and therefore doesn't necessitate to be async.
+     */
+    constructor( listenFunction: Fn, sync?: boolean = true ) {
+        super( sync );
 
         this.children.completed = new Action();
         this.children.failed = new Action();
@@ -29,7 +34,6 @@ export default class AsyncResultAction< T, Fn: (...args: Array< any > ) => Promi
         return this.createFunctor( this.triggerPromise );
     }
 
-
     processResult( promise: ?Promise< T > ) {
         if( !( promise instanceof Promise ) ) return;
         promise.then( ( ...response ) => this.completed.trigger( ...response ) ).catch( ( ...error ) => this.failed.asFunction( ...error ) );
@@ -38,9 +42,7 @@ export default class AsyncResultAction< T, Fn: (...args: Array< any > ) => Promi
     /**
      * Returns a Promise for the triggered action
      */
-    triggerPromise() : Promise< T > {
-        const args = arguments;
-
+    triggerPromise( ...args: any[] ) : Promise< T > {
         const promise = new Promise( ( resolve, reject ) => {
             var removeSuccess = this.completed.listen( ( args ) => {
                 removeSuccess();

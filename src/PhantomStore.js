@@ -14,7 +14,7 @@ export { default as FluxComponent } from './FluxComponent';
  *   this.connectStore( new PhantomStore( () => fetch( '/url' ), arg1, arg2 ), 'stateKey' );
  *
  */
-export default class PhantomStore< T > extends Store< T > {
+export default class PhantomStore< T: Object > extends Store< T > {
     /**
      *
      * @param  {Function}   promiseFunctor      the function returning a Promise, to wrap

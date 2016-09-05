@@ -85,9 +85,15 @@ export default function FluxComponent( target: Function ) {
      * @param  {Store} store        the store to listen to
      * @param  {string} stateKey    the key in the state of the component where the state of the store will be put
      */
-    clazz.connectStore = function( store: Store< * >, stateKey: string ) {
+    clazz.connectStore = function( store: Store< * >, stateKey: string, initialState?: boolean = false ) {
         this.__stores = this.__stores || [];
+
         this.__stores.push( { store, stateKey } );
+
+        if( initialState ) {
+            this.state = this.state || {};
+            this.state[ stateKey ] = store.state
+        }
     };
 
     /**
@@ -95,7 +101,7 @@ export default function FluxComponent( target: Function ) {
      * @param  {Publiser} publisher
      * @param  {Function} callback
      */
-    clazz.listenTo = function( publisher: Publisher, callback: Function ) {
+    clazz.listenTo = function( publisher: Store< * > | Action< * >, callback: Function ) {
         this.__publishers = this.__publishers || [];
         this.__publishers.push( { publisher, callback } );
     };

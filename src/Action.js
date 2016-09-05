@@ -3,32 +3,36 @@ import Publisher                    from './Publisher';
 import type { UnsubscribeFunction } from './Publisher';
 
 
-export type ActionFunctor = $All< Function, {
+export type ActionFunctor< Fn > = $All< Function, {
     _isActionFunctor    : boolean;
-    action              : Action;
+    action              : Action< Fn >;
     listen              : ( callback: ( x: any ) => ?Promise< * > ) => UnsubscribeFunction;
     listenOnce          : ( callback: ( x: any ) => ?Promise< * > ) => UnsubscribeFunction;
 } >;
 
-type Children = { [key: string]: Action };
+type Children = { [key: string]: Action< * > };
 
 
 
 /**
  *
  */
-export default class Action extends Publisher {
+export default class Action< Fn > extends Publisher {
     children    : Children;
 
-    constructor() {
+    /** Whether or not the triggering of the action is synchronous or at the next tick. */
+    _sync       : boolean;
+
+    constructor( sync?: boolean = false  ) {
         super();
         this.children = {};
+        this._sync  = sync;
     }
 
     /**
      * Creates children actions
      */
-    withChildren( children: Array< Children | string > ) : Action {
+    withChildren( children: Array< Children | string > ) : Action< Fn > {
         children.forEach( ( child ) => {
             if( typeof child === 'string' ) {
                 let action = new Action();
@@ -48,15 +52,20 @@ export default class Action extends Publisher {
     /**
      * Returns a synchronous function to trigger the action
      */
-    get asSyncFunction() : any {
+    get asSyncFunction() : Fn {
         return this.createFunctor( this.triggerSync );
     }
 
     /**
     * Returns a function to trigger the action, async or sync depending on the action definition.
      */
-    get asFunction() : any {
-        return this.createFunctor( this.trigger );
+    get asFunction() : Fn {
+        return this.createFunctor( this._sync ? this.triggerSync : this.trigger );
+    }
+
+
+    get exec() : Fn {
+        return this.asFunction;
     }
 
 

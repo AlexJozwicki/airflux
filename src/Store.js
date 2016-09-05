@@ -8,14 +8,13 @@ export type StateMutation< State > = ( x: State ) => State;
 
 /**
  */
-export default class Store< State > extends Listener {
+export default class Store< State: Object > extends Listener {
     state  : State;
 
     constructor() {
         super();
     }
 
-    get eventLabel() : string { return 'change'; }
 
     /**
      * Publishes the state to all subscribers.
@@ -25,6 +24,18 @@ export default class Store< State > extends Listener {
         super.trigger( this.state );
     }
 
+    /**
+     * Just like FluxComponent, pipe the content of another Store into the state of this one.
+     */
+    connectStore( store: Store< * >, stateKey: string, initialState?: boolean = false ) {
+        this.state = this.state || {};
+        this.state[ stateKey ] = store.state;
+        this.listenTo( store, state => this.setState( { [ stateKey ]: state } ) );
+    }
+
+    /**
+     * Just like React.Component, modifies the state with whatever you passed
+     */
     setState( partialState: $Shape< State >, callback?: () => void ) {
         this.state = { ...this.state, partialState };
         this.publishState();
@@ -32,4 +43,7 @@ export default class Store< State > extends Listener {
             callback();
         }
     }
+
+    /** @private */
+    get eventLabel() : string { return 'change'; }
 }
