@@ -1,6 +1,6 @@
 {
   "name": "airflux",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "A pure ES6 fork of the Reflux data flow library similar to Facebook Flux",
   "files": [
     "*.md",
