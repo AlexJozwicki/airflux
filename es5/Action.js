@@ -27,17 +27,22 @@ var Action = (function (_Publisher) {
     _inherits(Action, _Publisher);
 
     function Action() {
+        var sync = arguments.length <= 0 || arguments[0] === undefined ? false : arguments[0];
+
         _classCallCheck(this, Action);
 
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Action).call(this));
 
         _this.children = {};
+        _this._sync = sync;
         return _this;
     }
 
     /**
      * Creates children actions
      */
+
+    /** Whether or not the triggering of the action is synchronous or at the next tick. */
 
     _createClass(Action, [{
         key: 'withChildren',
@@ -101,7 +106,12 @@ var Action = (function (_Publisher) {
     }, {
         key: 'asFunction',
         get: function get() {
-            return this.createFunctor(this.trigger);
+            return this.createFunctor(this._sync ? this.triggerSync : this.trigger);
+        }
+    }, {
+        key: 'exec',
+        get: function get() {
+            return this.asFunction;
         }
     }, {
         key: 'eventLabel',

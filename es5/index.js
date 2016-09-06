@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.Capacitor = exports.FluxComponent = exports.Joins = exports.Store = exports.Publisher = exports.SyncAction = exports.PromiseAction = exports.AsyncResultAction = exports.Action = undefined;
+exports.Core = exports.Capacitor = exports.FluxComponent = exports.Joins = exports.Store = exports.Publisher = exports.PromiseAction = exports.AsyncResultAction = exports.Action = undefined;
 
 var _Action = require('./Action');
 
@@ -29,15 +29,6 @@ Object.defineProperty(exports, 'PromiseAction', {
   enumerable: true,
   get: function get() {
     return _PromiseAction.default;
-  }
-});
-
-var _SyncAction = require('./SyncAction');
-
-Object.defineProperty(exports, 'SyncAction', {
-  enumerable: true,
-  get: function get() {
-    return _SyncAction.default;
   }
 });
 
@@ -81,6 +72,11 @@ var _JoinStores = require('./JoinStores');
 
 var _Joins = _interopRequireWildcard(_JoinStores);
 
+var _utils = require('./utils');
+
+var _Core = _interopRequireWildcard(_utils);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 exports.Joins = _Joins;
+exports.Core = _Core;

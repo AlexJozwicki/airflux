@@ -4,6 +4,8 @@ var _createClass = (function () { function defineProperties(target, props) { for
 
 var _class;
 
+// airflux
+
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
@@ -13,17 +15,21 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _FluxComponent = require('./FluxComponent');
+var _invariant = require('invariant');
 
-var _FluxComponent2 = _interopRequireDefault(_FluxComponent);
+var _invariant2 = _interopRequireDefault(_invariant);
+
+var _Action = require('./Action');
+
+var _Action2 = _interopRequireDefault(_Action);
 
 var _Store = require('./Store');
 
 var _Store2 = _interopRequireDefault(_Store);
 
-var _invariant = require('invariant');
+var _FluxComponent = require('./FluxComponent');
 
-var _invariant2 = _interopRequireDefault(_invariant);
+var _FluxComponent2 = _interopRequireDefault(_FluxComponent);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -39,13 +45,22 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Capacitor = (0, _FluxComponent2.default)(_class = (function (_React$Component) {
     _inherits(Capacitor, _React$Component);
 
+    _createClass(Capacitor, [{
+        key: 'listenTo',
+        value: function listenTo(publisher, callback) {}
+    }, {
+        key: 'connectStore',
+        value: function connectStore(store, stateKey) {}
+    }]);
+
     function Capacitor(props) {
         _classCallCheck(this, Capacitor);
+
+        //        ( this: FluxListener );
 
         var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Capacitor).call(this, props));
 
         _this.state = {};
-
         Object.keys(props).filter(function (key) {
             return key != 'children' && typeof props[key].listen === 'function';
         }).forEach(function (key) {

@@ -17,6 +17,8 @@ var _Listener3 = _interopRequireDefault(_Listener2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -35,25 +37,51 @@ var Store = (function (_Listener) {
         return _possibleConstructorReturn(this, Object.getPrototypeOf(Store).call(this));
     }
 
+    /**
+     * Publishes the state to all subscribers.
+     * This ensures that the stores always publishes the same data/signature.
+     */
+
     _createClass(Store, [{
         key: 'publishState',
-
-        /**
-         * Publishes the state to all subscribers.
-         * This ensures that the stores always publishes the same data/signature.
-         */
         value: function publishState() {
             _get(Object.getPrototypeOf(Store.prototype), 'trigger', this).call(this, this.state);
         }
+
+        /**
+         * Just like FluxComponent, pipe the content of another Store into the state of this one.
+         */
+
+    }, {
+        key: 'connectStore',
+        value: function connectStore(store, stateKey) {
+            var _this2 = this;
+
+            var initialState = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
+            this.state = this.state || {};
+            this.state[stateKey] = store.state;
+            this.listenTo(store, function (state) {
+                return _this2.setState(_defineProperty({}, stateKey, state));
+            });
+        }
+
+        /**
+         * Just like React.Component, modifies the state with whatever you passed
+         */
+
     }, {
         key: 'setState',
         value: function setState(partialState, callback) {
-            this.state = _extends({}, this.state, { partialState: partialState });
+            this.state = _extends({}, this.state, partialState);
             this.publishState();
             if (typeof callback === 'function') {
                 callback();
             }
         }
+
+        /** @private */
+
     }, {
         key: 'eventLabel',
         get: function get() {

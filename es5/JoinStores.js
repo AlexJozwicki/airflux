@@ -19,7 +19,6 @@ function joinClassFactory(strategy) {
     var store = new _Store2.default();
 
     // TODO: when flow supports :: syntax, switch to it
-    // $FlowComputedProperty
 
     for (var _len = arguments.length, listenables = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         listenables[_key - 1] = arguments[_key];

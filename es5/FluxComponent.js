@@ -108,8 +108,16 @@ function FluxComponent(target) {
      * @param  {string} stateKey    the key in the state of the component where the state of the store will be put
      */
     clazz.connectStore = function (store, stateKey) {
+        var initialState = arguments.length <= 2 || arguments[2] === undefined ? false : arguments[2];
+
         this.__stores = this.__stores || [];
+
         this.__stores.push({ store: store, stateKey: stateKey });
+
+        if (initialState) {
+            this.state = this.state || {};
+            this.state[stateKey] = store.state;
+        }
     };
 
     /**

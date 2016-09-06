@@ -65,8 +65,11 @@ import * as airflux                                     from 'airflux';
 
 const search = new airflux.Action().asFunction;
 
-// loadElements will have the same signature as the function passed to AsyncResultAction; Flow will render an error otherwise
-const loadResults = new airflux.AsyncResultAction( ( search: string, max: number ) => fetch( `/results/search/${search}/${max}` ).then( response => response.json() ) ).asFunction;
+// loadElements will have the same signature as the function passed to AsyncResultAction.
+// Flow will render an error otherwise
+const loadResults = new airflux.AsyncResultAction(
+    ( search: string, max: number ) => fetch( `/results/search/${search}/${max}` ).then( r => r.json() )
+).asFunction;
 
 /**
  * A store that will hold the current search being done by the user.
@@ -184,7 +187,6 @@ They're created on the functor of the parent action as functor themselves.
 
 ```javascript
 var loadAction = new airflux.AsyncResultAction();
-console.log( loadAction.completed instanceof Action ); // true
 
 var load = loadAction.asFunction;
 

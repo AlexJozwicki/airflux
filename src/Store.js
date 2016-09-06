@@ -1,7 +1,9 @@
 /* @flow */
 import Listener from './Listener';
 
+
 export type StateMutation< State > = ( x: State ) => State;
+
 
 
 
@@ -37,7 +39,7 @@ export default class Store< State: Object > extends Listener {
      * Just like React.Component, modifies the state with whatever you passed
      */
     setState( partialState: $Shape< State >, callback?: () => void ) {
-        this.state = { ...this.state, partialState };
+        this.state = { ...this.state, ...partialState };
         this.publishState();
         if( typeof callback === 'function' ) {
             callback();

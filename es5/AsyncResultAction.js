@@ -24,10 +24,18 @@ var AsyncResultAction = (function (_Action) {
 
     //_listenFunction : Fn;
 
+    /**
+     * By default we create this type of action as synchronous.
+     * If the action is returning a Promise, it's safe to consider that most of the time the action itself is quite simple,
+     * and therefore doesn't necessitate to be async.
+     */
+
     function AsyncResultAction(listenFunction) {
+        var sync = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
         _classCallCheck(this, AsyncResultAction);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AsyncResultAction).call(this));
+        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(AsyncResultAction).call(this, sync));
 
         _this.children.completed = new _Action3.default();
         _this.children.failed = new _Action3.default();
@@ -68,7 +76,9 @@ var AsyncResultAction = (function (_Action) {
         value: function triggerPromise() {
             var _this3 = this;
 
-            var args = arguments;
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
+            }
 
             var promise = new Promise(function (resolve, reject) {
                 var removeSuccess = _this3.completed.listen(function (args) {
