@@ -38,8 +38,14 @@ export default class Store< State: Object > extends Listener {
     /**
      * Just like React.Component, modifies the state with whatever you passed
      */
-    setState( partialState: $Shape< State >, callback?: () => void ) {
-        this.state = { ...this.state, ...partialState };
+    setState( partialState: $Shape< State > | ( currentState: State ) => State, callback?: () => void ) {
+        if( typeof partialState === 'function' ) {
+            this.state = partialState( this.state );
+        }
+        else {
+            this.state = { ...this.state, ...partialState };
+        }
+
         this.publishState();
         if( typeof callback === 'function' ) {
             callback();

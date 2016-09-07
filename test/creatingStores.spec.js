@@ -8,6 +8,36 @@ import Store from '../src/Store';
 chai.use(require('chai-as-promised'));
 
 describe('Creating stores', () => {
+    describe('to test state mutation functions', () => {
+        var store;
+
+        beforeEach( () => {
+            class AnonStore extends Store {
+                state = { name: 'John' };
+            }
+
+            store = new AnonStore();
+        });
+
+        it('should create new key in the state', () => {
+            store.setState( { foo: 'bar' } );
+            return assert.equal( store.state.foo, 'bar' );
+        });
+
+        it('should overwrite existing value', () => {
+            store.setState( { name: 'John Doe' } );
+            return assert.equal( store.state.name, 'John Doe' );
+        });
+
+        it('should accept a function to modify the state', () => {
+            store.setState( s => {
+                s.name = 'Jane';
+                return s;
+            } );
+            return assert.equal( store.state.name, 'Jane' );
+        });
+    });
+
     describe('with one store listening to a simple action', () => {
         var action,
             store,
@@ -25,10 +55,9 @@ describe('Creating stores', () => {
                         unsubCallback = this.listenTo(action, this.actionCalled);
                     }
 
-                    actionCalled() {
-                        var args = Array.prototype.slice.call(arguments, 0);
-                        this.trigger(args);
-                        resolve(args);
+                    actionCalled( ...args ) {
+                        this.trigger( args );
+                        resolve( args );
                     }
                 }
 
@@ -139,8 +168,7 @@ describe('Creating stores', () => {
                     this.listenTo(action, this.actionCalled);
                 }
 
-                actionCalled() {
-                    var args = Array.prototype.slice.call(arguments, 0);
+                actionCalled( ...args ) {
                     this.trigger(args);
                 }
             };

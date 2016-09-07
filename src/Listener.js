@@ -1,19 +1,22 @@
 /* @flow */
-import * as _                   from './utils';
-import invariant                from 'invariant';
+import * as _                           from './utils';
+import invariant                        from 'invariant';
 
-import Publisher                from './Publisher';
-import Join                     from './Join';
-import type { JoinStrategies }  from './Join';
+import Publisher                        from './Publisher';
+import Join                             from './Join';
+import type { JoinStrategies }          from './Join';
 
-import type Action              from './Action';
-import type { ActionFunctor }   from './Action';
-import type Store               from './Store';
+import type { UnsubscribeFunction }     from './Publisher';
+import type Action                      from './Action';
+import type { ActionFunctor }           from './Action';
+import type Store                       from './Store';
 
 export type SubscriptionObj = {
     stop: Function;
     listenable: (Publisher | Array< Publisher >);
 };
+
+
 
 
 /**
@@ -24,10 +27,6 @@ export type SubscriptionObj = {
 export default class Listener extends Publisher {
     _subscriptions: Array< SubscriptionObj > = [];
 
-    constructor() {
-        super();
-    }
-
 
     /**
      * An internal utility function used by `validateListening`
@@ -36,12 +35,11 @@ export default class Listener extends Publisher {
      * @returns {boolean} The result of a recursive search among `this._subscriptions`
      */
     hasListener( listenable: Publisher ) : boolean {
+        // flatten the listenables
         const pubs : Array< Publisher > = this._subscriptions
             .reduce( ( r, sub ) => r.concat( sub.listenable ), [] );
 
-        // TODO: replace by .find one day, with a polyfill
-        return pubs.filter( pub => ( pub === listenable || ( pub.hasListener && pub.hasListener( listenable ) ) ) )
-                   .length > 0;
+        return pubs.some( pub => ( pub === listenable || ( pub.hasListener && pub.hasListener( listenable ) ) ) );
     }
 
 
@@ -144,15 +142,12 @@ export default class Listener extends Publisher {
      * @param {Function|String} defaultCallback The method to receive the data
      */
     fetchInitialState( listenable: Publisher, defaultCallback: Function ) {
-        var self = this;
         if( _.isFunction(defaultCallback) && listenable.state ) {
             var data = listenable.state;
             if( data && _.isFunction( data.then ) ) {
-                data.then(function() {
-                    defaultCallback.apply(self, arguments);
-                });
+                data.then( ( ...args: any[] ) => defaultCallback.apply( this, args ) );
             } else {
-                defaultCallback.call(this, data);
+                defaultCallback.call( this, data );
             }
         }
     }
@@ -209,9 +204,9 @@ export default class Listener extends Publisher {
         // validate everything
         listenables.forEach( listenable => this.validateListening( listenable ) );
 
-        const stop: Function = new Join( listenables, strategy ).listen( callback );
+        const stop: UnsubscribeFunction = new Join( listenables, strategy ).listen( callback );
 
-        var subobj : SubscriptionObj = {
+        const subobj : SubscriptionObj = {
             listenable  : listenables,
             stop: () => {
                 stop();

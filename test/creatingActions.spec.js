@@ -5,7 +5,6 @@ var assert  = chai.assert;
 import Action               from '../src/Action';
 import AsyncResultAction    from '../src/AsyncResultAction';
 import PromiseAction        from '../src/PromiseAction';
-import SyncAction           from '../src/SyncAction';
 import Store                from '../src/Store';
 import Listener             from '../src/Listener';
 
@@ -86,7 +85,7 @@ describe('Creating action', function() {
 
 
     describe("the synchronisity",function(){
-        var syncaction = new SyncAction().asFunction,
+        var syncaction = new Action( true ).asFunction,
             asyncaction = new Action().asFunction,
             synccalled = false,
             asynccalled = false;

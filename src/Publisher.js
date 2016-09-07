@@ -7,7 +7,9 @@ export type UnsubscribeFunction = () => void;
 
 
 /**
- * @constructor
+ * Base class of everything.
+ * - actions are a directly subclass
+ * - stores are inheriting from Listener
  */
 export default class Publisher {
     emitter            : any;
@@ -74,8 +76,7 @@ export default class Publisher {
     listenOnce( callback: ( x: any ) => ?any ) : UnsubscribeFunction {
         invariant( typeof callback === 'function', 'listenOnce has to be given a valid callback function' );
 
-        var unsubscribe = this.listen( () => {
-            var args = Array.prototype.slice.call(arguments);
+        var unsubscribe = this.listen( ( ...args: any[] ) => {
             unsubscribe();
             return callback.apply( this, args );
         });
