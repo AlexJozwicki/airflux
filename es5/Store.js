@@ -73,7 +73,12 @@ var Store = (function (_Listener) {
     }, {
         key: 'setState',
         value: function setState(partialState, callback) {
-            this.state = _extends({}, this.state, partialState);
+            if (typeof partialState === 'function') {
+                this.state = partialState(this.state);
+            } else {
+                this.state = _extends({}, this.state, partialState);
+            }
+
             this.publishState();
             if (typeof callback === 'function') {
                 callback();

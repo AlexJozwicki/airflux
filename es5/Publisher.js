@@ -22,7 +22,9 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /**
- * @constructor
+ * Base class of everything.
+ * - actions are a directly subclass
+ * - stores are inheriting from Listener
  */
 
 var Publisher = (function () {
@@ -102,13 +104,15 @@ var Publisher = (function () {
     }, {
         key: 'listenOnce',
         value: function listenOnce(callback) {
-            var _arguments = arguments,
-                _this2 = this;
+            var _this2 = this;
 
             (0, _invariant2.default)(typeof callback === 'function', 'listenOnce has to be given a valid callback function');
 
             var unsubscribe = this.listen(function () {
-                var args = Array.prototype.slice.call(_arguments);
+                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                    args[_key] = arguments[_key];
+                }
+
                 unsubscribe();
                 return callback.apply(_this2, args);
             });
@@ -122,8 +126,8 @@ var Publisher = (function () {
     }, {
         key: 'triggerSync',
         value: function triggerSync() {
-            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                args[_key] = arguments[_key];
+            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                args[_key2] = arguments[_key2];
             }
 
             var preResult = this.preEmit.apply(this, args);
@@ -145,8 +149,8 @@ var Publisher = (function () {
         value: function trigger() {
             var _this3 = this;
 
-            for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-                args[_key2] = arguments[_key2];
+            for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+                args[_key3] = arguments[_key3];
             }
 
             _.nextTick(function () {

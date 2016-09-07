@@ -51,32 +51,37 @@ var Listener = (function (_Publisher) {
     _inherits(Listener, _Publisher);
 
     function Listener() {
+        var _Object$getPrototypeO;
+
+        var _temp, _this, _ret;
+
         _classCallCheck(this, Listener);
 
-        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Listener).call(this));
+        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+        }
 
-        _this._subscriptions = [];
-        return _this;
+        return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Listener)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this._subscriptions = [], _temp), _possibleConstructorReturn(_this, _ret);
     }
-
-    /**
-     * An internal utility function used by `validateListening`
-     *
-     * @param {Publisher} listenable The listenable we want to search for
-     * @returns {boolean} The result of a recursive search among `this._subscriptions`
-     */
 
     _createClass(Listener, [{
         key: 'hasListener',
+
+        /**
+         * An internal utility function used by `validateListening`
+         *
+         * @param {Publisher} listenable The listenable we want to search for
+         * @returns {boolean} The result of a recursive search among `this._subscriptions`
+         */
         value: function hasListener(listenable) {
+            // flatten the listenables
             var pubs = this._subscriptions.reduce(function (r, sub) {
                 return r.concat(sub.listenable);
             }, []);
 
-            // TODO: replace by .find one day, with a polyfill
-            return pubs.filter(function (pub) {
+            return pubs.some(function (pub) {
                 return pub === listenable || pub.hasListener && pub.hasListener(listenable);
-            }).length > 0;
+            });
         }
 
         /**
@@ -198,12 +203,17 @@ var Listener = (function (_Publisher) {
     }, {
         key: 'fetchInitialState',
         value: function fetchInitialState(listenable, defaultCallback) {
-            var self = this;
+            var _this3 = this;
+
             if (_.isFunction(defaultCallback) && listenable.state) {
                 var data = listenable.state;
                 if (data && _.isFunction(data.then)) {
                     data.then(function () {
-                        defaultCallback.apply(self, arguments);
+                        for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+                            args[_key2] = arguments[_key2];
+                        }
+
+                        return defaultCallback.apply(_this3, args);
                     });
                 } else {
                     defaultCallback.call(this, data);
@@ -221,8 +231,8 @@ var Listener = (function (_Publisher) {
     }, {
         key: 'joinTrailing',
         value: function joinTrailing(callback) {
-            for (var _len = arguments.length, listenables = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-                listenables[_key - 1] = arguments[_key];
+            for (var _len3 = arguments.length, listenables = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+                listenables[_key3 - 1] = arguments[_key3];
             }
 
             return this._createJoin('last', callback, listenables);
@@ -239,8 +249,8 @@ var Listener = (function (_Publisher) {
     }, {
         key: 'joinLeading',
         value: function joinLeading(callback) {
-            for (var _len2 = arguments.length, listenables = Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-                listenables[_key2 - 1] = arguments[_key2];
+            for (var _len4 = arguments.length, listenables = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
+                listenables[_key4 - 1] = arguments[_key4];
             }
 
             return this._createJoin('first', callback, listenables);
@@ -257,8 +267,8 @@ var Listener = (function (_Publisher) {
     }, {
         key: 'joinConcat',
         value: function joinConcat(callback) {
-            for (var _len3 = arguments.length, listenables = Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-                listenables[_key3 - 1] = arguments[_key3];
+            for (var _len5 = arguments.length, listenables = Array(_len5 > 1 ? _len5 - 1 : 0), _key5 = 1; _key5 < _len5; _key5++) {
+                listenables[_key5 - 1] = arguments[_key5];
             }
 
             return this._createJoin('all', callback, listenables);
@@ -275,8 +285,8 @@ var Listener = (function (_Publisher) {
     }, {
         key: 'joinStrict',
         value: function joinStrict(callback) {
-            for (var _len4 = arguments.length, listenables = Array(_len4 > 1 ? _len4 - 1 : 0), _key4 = 1; _key4 < _len4; _key4++) {
-                listenables[_key4 - 1] = arguments[_key4];
+            for (var _len6 = arguments.length, listenables = Array(_len6 > 1 ? _len6 - 1 : 0), _key6 = 1; _key6 < _len6; _key6++) {
+                listenables[_key6 - 1] = arguments[_key6];
             }
 
             return this._createJoin('strict', callback, listenables);
@@ -284,13 +294,13 @@ var Listener = (function (_Publisher) {
     }, {
         key: '_createJoin',
         value: function _createJoin(strategy, callback, listenables) {
-            var _this3 = this;
+            var _this4 = this;
 
             (0, _invariant2.default)(listenables.length >= 2, 'Cannot create a join with less than 2 listenables!');
 
             // validate everything
             listenables.forEach(function (listenable) {
-                return _this3.validateListening(listenable);
+                return _this4.validateListening(listenable);
             });
 
             var stop = new _Join2.default(listenables, strategy).listen(callback);
@@ -309,7 +319,7 @@ var Listener = (function (_Publisher) {
                     return stop;
                 })(function () {
                     stop();
-                    _this3.removeSubscription(subobj);
+                    _this4.removeSubscription(subobj);
                 })
             };
 
