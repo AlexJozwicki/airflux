@@ -39,7 +39,7 @@ export default class Listener extends Publisher {
         const pubs : Array< Publisher > = this._subscriptions
             .reduce( ( r, sub ) => r.concat( sub.listenable ), [] );
 
-        return pubs.some( pub => ( pub === listenable || ( pub.hasListener && pub.hasListener( listenable ) ) ) );
+        return pubs.some( pub => ( pub === listenable || ( typeof pub.hasListener === 'function' && pub.hasListener( listenable ) ) ) );
     }
 
 
@@ -49,10 +49,10 @@ export default class Listener extends Publisher {
      *
      * @param {Publisher} listenable An Action or Store that should be listened to.
      */
-    validateListening( listenable: Publisher | ActionFunctor< * > ) {
+    validateListening( listenable: Publisher | ActionFunctor< any > ) {
         invariant( listenable !== this, 'Listener is not able to listen to itself' );
         invariant( typeof listenable.listen === 'function', 'listenable should be a Publisher' );
-        invariant( !(listenable.hasListener && listenable.hasListener(this)), 'Listener cannot listen to this listenable because of circular loop' );
+        invariant( !( typeof listenable.hasListener === 'function' && listenable.hasListener(this)), 'Listener cannot listen to this listenable because of circular loop' );
     }
 
     /**
@@ -64,7 +64,7 @@ export default class Listener extends Publisher {
      *
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
-    listenTo( listenable: Publisher | ActionFunctor< * >, callback: Function, defaultCallback: ?Function ) : SubscriptionObj  {
+    listenTo( listenable: Publisher | ActionFunctor< any >, callback: Function, defaultCallback: ?Function ) : SubscriptionObj  {
         this.validateListening( listenable );
         invariant( callback != null, 'listenTo should be called with a valid callback' );
 
@@ -143,12 +143,7 @@ export default class Listener extends Publisher {
      */
     fetchInitialState( listenable: Publisher, defaultCallback: Function ) {
         if( _.isFunction(defaultCallback) && listenable.state ) {
-            var data = listenable.state;
-            if( data && _.isFunction( data.then ) ) {
-                data.then( ( ...args: any[] ) => defaultCallback.apply( this, args ) );
-            } else {
-                defaultCallback.call( this, data );
-            }
+            defaultCallback.call( this, listenable.state );
         }
     }
 

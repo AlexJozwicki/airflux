@@ -216,22 +216,6 @@ describe('Creating stores', () => {
             var promise = createPromiseForTest(store);
             return assert.eventually.equal(promise, '[...] initial state');
         });
-
-        it('should get initial state from getter state returned promise', function() {
-            var store = new class extends baseStore {
-                get state() {
-                    return new Promise(function (resolve) {
-                        setTimeout(function () {
-                            resolve(['initial state']);
-                        }, 20);
-                    });
-                }
-            }();
-
-            var promise = createPromiseForTest(store);
-            return assert.eventually.equal(promise, '[...] initial state');
-        });
-
     });
 /*
     describe("the listenToMany method",function(){
