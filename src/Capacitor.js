@@ -15,12 +15,11 @@ import FluxComponent                                    from './FluxComponent';
 /**
  */
 @FluxComponent
-export default class Capacitor extends React.Component {
+export default class Capacitor extends React.Component<
+  { [ name: string ]: Store< any > },
+  { [ name: string ]: Store< any > }> {
     listenTo( publisher: Store< * > | Action< * >, callback: Function ) : any {}
     connectStore( store: Store< any >, stateKey: string ) : any {}
-
-    props               : { [ name: string ]: Store< any > };
-    state               : { [ name: string ]: Store< any > } = {};
 
     constructor( props: any ) {
         super( props );
@@ -33,7 +32,7 @@ export default class Capacitor extends React.Component {
               .forEach( key => this.connectStore( props[ key ], key ) );
     }
 
-    render() : React.Element< * > {
+    render() {
         invariant( React.Children.count( this.props.children ) == 1, 'Capacitor should only have one child' );
         return React.cloneElement( React.Children.only( this.props.children ), this.state );
     }

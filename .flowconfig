@@ -15,9 +15,7 @@
 
 [options]
 module.system=node
-strip_root=true
 munge_underscores=true
-unsafe.enable_getters_and_setters=true
 esproposal.decorators=ignore
 esproposal.class_static_fields=ignore
 esproposal.class_instance_fields=ignore
@@ -29,4 +27,4 @@ suppress_comment= \\(.\\|\n\\)*\\$FlowComputedProperty
 suppress_comment= \\(.\\|\n\\)*\\$FlowDynamicTypeCheckBug
 
 [version]
-0.32.0
+0.66.0
