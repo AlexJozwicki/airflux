@@ -1,0 +1,9 @@
+import type Action from './Action';
+import type Store from './Store';
+
+
+
+declare interface FluxListener {
+    listenTo( publisher: Store< * > | Action< * >, callback: Function ) : any;
+    connectStore( store: Store< any >, stateKey: string ) : any;
+};

@@ -1,10 +1,9 @@
 {
   "name": "airflux",
-  "version": "0.8.1",
+  "version": "0.9.0-beta1",
   "description": "A pure ES6 fork of the Reflux data flow library similar to Facebook Flux",
   "files": [
     "*.md",
-    "es5",
     "es6",
     "lib",
     "commonjs2"
@@ -12,9 +11,7 @@
   "main": "es6/index.js",
   "scripts": {
     "build": "npm run build-cjs && npm run build-es6",
-    "build-cjs": "rimraf lib && babel ./src -d es5 --ignore '__tests__'",
     "build-es6": "rimraf es6 && cp -R ./src es6",
-    "build-umd": "NODE_ENV=production webpack",
     "test-browser": "karma start"
   },
   "author": "Alexandre Jozwicki",
