@@ -77,11 +77,11 @@ export default class Action< Fn > extends Publisher {
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );
         Object.defineProperty( functor, 'action', { value: this } );
-        Object.defineProperty( functor, 'listen', { value: ( fn, bindCtx ) => {
-            return Action.prototype.listen.call( this, fn, bindCtx );
+        Object.defineProperty( functor, 'listen', { value: ( fn ) => {
+            return Action.prototype.listen.call( this, fn );
         } } );
-        Object.defineProperty( functor, 'listenOnce', { value: ( fn, bindCtx ) => {
-            return Action.prototype.listenOnce.call( this, fn, bindCtx );
+        Object.defineProperty( functor, 'listenOnce', { value: ( fn ) => {
+            return Action.prototype.listenOnce.call( this, fn );
         } } );
 
         Object.keys( this.children ).forEach( ( childName ) => {
