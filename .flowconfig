@@ -1,18 +1,16 @@
 [ignore]
-.*/es5/.*
-.*/es6/.*
-.*/lib/.*
 .*/react/node_modules/.*
 .*/node_modules/fbjs/*
 .*/node_modules/babel.*
 .*/node_modules/babylon.*
 .*/node_modules/npm/.*
+.*/node_modules/config-chain/.*
 
 [include]
-./src
 
 [libs]
-./flow/
+
+[lints]
 
 [options]
 module.system=node
@@ -22,10 +20,4 @@ esproposal.class_static_fields=ignore
 esproposal.class_instance_fields=ignore
 esproposal.export_star_as=enable
 
-suppress_comment= \\(.\\|\n\\)*\\$IgnoreFlow
-suppress_comment= \\(.\\|\n\\)*\\$FlowPrototypeDecl
-suppress_comment= \\(.\\|\n\\)*\\$FlowComputedProperty
-suppress_comment= \\(.\\|\n\\)*\\$FlowDynamicTypeCheckBug
-
-[version]
-0.76.0
+[strict]
