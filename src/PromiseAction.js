@@ -2,11 +2,11 @@
 import AsyncResultAction                from './AsyncResultAction';
 import type Action, { ActionFunctor }   from './Action';
 
-export type PromiseFunctor = $All< ActionFunctor< * >, {
+export type PromiseFunctor = any;/*$All< ActionFunctor< * >, {
     completed   : Action< * >;
     failed      : Action< * >;
 } >;
-
+*/
 
 
 /**

@@ -9,8 +9,6 @@ import Store                from '../src/Store';
 import Listener             from '../src/Listener';
 
 
-//var sinon   = require('sinon');
-
 chai.use(require('chai-as-promised'));
 
 describe('Creating action', function() {
@@ -48,6 +46,7 @@ describe('Creating action', function() {
         assert.equal( functor.failed._isActionFunctor, true );
     });
 
+/*
     it("should create a functor returning a Promise-like for Action with async results",function(){
         var action = new PromiseAction( () => new Promise( ( resolve ) => setTimeout( resolve, 500 ) ) );
         var functor = action.asFunction;
@@ -56,6 +55,7 @@ describe('Creating action', function() {
 
         setTimeout( () => assert.equal( spy.callCount, 1 ), 1000 );
     });
+*/
 
     it("should add completed and failed child functors on the functor of async actions",function(){
         var functor = new AsyncResultAction().asFunction;
@@ -161,61 +161,6 @@ describe('Creating action', function() {
             action(testArgs[0], testArgs[1]);
 
             return assert.eventually.deepEqual(promise, testArgs);
-        });
-
-        describe('when adding preEmit hook', function() {
-            var action = new Action();
-            action.preEmit = sinon.spy();
-
-            action.asFunction(1337,'test');
-
-            it('should receive arguments from action functor', function() {
-                assert.deepEqual( action.preEmit.firstCall.args,[1337,'test'] );
-            });
-        });
-
-        describe('when adding shouldEmit hook',function(){
-            describe("when hook returns true",function(){
-                var shouldEmit = sinon.stub().returns(true),
-                    action = new Action(),
-                    callback = sinon.spy();
-
-                action.shouldEmit = shouldEmit;
-
-                var listener = new Listener();
-                listener.listenTo( action, callback );
-
-                action.trigger( 1337,'test' );
-
-                it('should receive arguments from action functor', function() {
-                    assert.deepEqual(shouldEmit.firstCall.args,[1337,'test']);
-                });
-
-                it('should still trigger to listeners',function(){
-                    assert.equal(callback.callCount,1);
-                    assert.deepEqual(callback.firstCall.args,[1337,'test']);
-                });
-
-            });
-
-            describe("when hook returns false",function(){
-                var shouldEmit = sinon.stub().returns(false),
-                    action = new Action(),
-                    callback = sinon.spy();
-                action.shouldEmit = shouldEmit;
-
-                var listener = new Listener();
-                listener.listenTo( action, callback );
-                action.trigger( 1337, 'test' );
-
-                it('should receive arguments from action functor', function() {
-                    assert.deepEqual(shouldEmit.firstCall.args,[1337,'test']);
-                });
-
-                it('should not trigger to listeners',function(){
-                    assert.equal(callback.callCount,0);
-                });
-            });
         });
     });
 

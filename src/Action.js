@@ -3,12 +3,12 @@ import Publisher                    from './Publisher';
 import type { UnsubscribeFunction } from './Publisher';
 
 
-export type ActionFunctor< Fn > = $All< Function, {
+export interface ActionFunctor< Fn > {
     _isActionFunctor    : boolean;
     action              : Action< Fn >;
-    listen              : ( callback: ( x: any ) => ?Promise< * > ) => UnsubscribeFunction;
-    listenOnce          : ( callback: ( x: any ) => ?Promise< * > ) => UnsubscribeFunction;
-} >;
+    listen              : ( callback: ( x: any ) => ?Promise< * > ) => any;
+    listenOnce          : ( callback: ( x: any ) => ?Promise< * > ) => any;
+};
 
 type Children = { [key: string]: Action< * > };
 
@@ -72,7 +72,7 @@ export default class Action< Fn > extends Publisher {
     /**
      *
      */
-    createFunctor( triggerFn: Function ) : any {
+    createFunctor( triggerFn: Function ) : any /* ( Fn & ActionFunctor< Fn > )*/ {
         var functor = triggerFn.bind( this );
 
         Object.defineProperty( functor, '_isActionFunctor', { value: true } );
@@ -88,6 +88,7 @@ export default class Action< Fn > extends Publisher {
             Object.defineProperty( functor, childName, { value: this.children[ childName ].asFunction } );
         });
 
+        // $IgnoreFlow
         return functor;
     }
 

@@ -1,7 +1,14 @@
 /* @flow */
 import Action from './Action';
+import type { ActionFunctor } from './Action';
 
 
+interface AsyncResultActionFunctor< Fn > {
+    _isActionFunctor    : boolean;
+    action              : Action< Fn >;
+    listen              : ( callback: ( x: any ) => ?Promise< * > ) => any;
+    listenOnce          : ( callback: ( x: any ) => ?Promise< * > ) => any;
+};
 
 
 
@@ -30,9 +37,10 @@ export default class AsyncResultAction< T, Fn: (...args: Array< any > ) => Promi
         }
     }
 
-    get asFunction() : Fn {
+    get asFunction() : ( Fn & AsyncResultActionFunctor< Fn > ) {
         return this.createFunctor( this.triggerPromise );
     }
+
 
     processResult( promise: ?Promise< T > ) {
         if( !( promise instanceof Promise ) ) return;
@@ -56,7 +64,7 @@ export default class AsyncResultAction< T, Fn: (...args: Array< any > ) => Promi
                 reject( args );
             });
 
-            this.trigger.apply( this, args );
+            this.trigger( ...args );
         });
 
         return promise;

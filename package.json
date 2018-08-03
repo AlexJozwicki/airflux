@@ -1,28 +1,27 @@
 {
   "name": "airflux",
-  "version": "0.9.0-beta1",
+  "version": "2.0.0-beta2",
   "description": "A pure ES6 fork of the Reflux data flow library similar to Facebook Flux",
   "files": [
     "*.md",
-    "es6",
-    "lib",
-    "commonjs2"
+    "build",
+    "src",
+    ".flowconfig"
   ],
-  "main": "es6/index.js",
-  "scripts": {
-    "build": "npm run build-cjs && npm run build-es6",
-    "build-es6": "rimraf es6 && cp -R ./src es6",
-    "test-browser": "karma start"
-  },
+  "main": "build/index.js",
   "author": "Alexandre Jozwicki",
   "contributors": [
     "Jan Kuča <jan@jankuca.com> (http://jankuca.com)",
     "Mikael Brassman"
   ],
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "http://github.com/AlexJozwicki/airflux.git"
+  },
+  "scripts": {
+    "build": "NODE_ENV=production neutrino build",
+    "test": "neutrino test"
   },
   "keywords": [
     "react",
@@ -30,43 +29,26 @@
     "reflux",
     "airflux"
   ],
-  "dependencies": {
-    "eventemitter3": "^1.1.1",
-    "invariant": "^2.2.0",
-    "react": "15.6.2"
-  },
   "devDependencies": {
-    "rimraf": "^2.4.3",
-    "babel-core": "^6.2.1",
-    "babel-loader": "^6.2.0",
-    "babel-plugin-syntax-class-properties": "^6.3.13",
-    "babel-plugin-syntax-decorators": "^6.3.13",
-    "babel-plugin-syntax-export-extensions": "^6.3.13",
-    "babel-plugin-transform-class-properties": "^6.3.13",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-plugin-transform-export-extensions": "^6.3.13",
-    "babel-preset-es2015": "^6.3.13",
-    "babel-preset-react": "^6.3.13",
-    "babel-preset-stage-0": "^6.3.13",
-    "babelify": "^7.2.0",
-    "benchmark": "^1.0.0",
-    "browserify": "^12.0.1",
-    "flow-bin": "0.66.0",
+    "@neutrinojs/babel-minify": "^8.3.0",
+    "@neutrinojs/karma": "^8.3.0",
+    "@neutrinojs/library": "^8.3.0",
+    "@neutrinojs/minify": "^8.3.0",
+    "babel-plugin-syntax-class-properties": "^6.13.0",
+    "babel-plugin-syntax-decorators": "^6.13.0",
+    "babel-plugin-syntax-export-extensions": "^6.13.0",
+    "babel-plugin-transform-class-properties": "^6.13.0",
+    "babel-plugin-transform-export-extensions": "^6.13.0",
+    "babel-preset-es2015": "^6.24.1",
     "chai": "^1.9.1",
     "chai-as-promised": "^4.1.1",
-    "install": "^0.4.1",
-    "jsdom": "^7.2.2",
-    "karma": "^0.13.16",
-    "karma-coverage": "^0.5.3",
-    "karma-jsdom-launcher": "^1.0.1",
-    "karma-mocha": "^0.2.1",
-    "karma-sinon": "^1.0.4",
-    "karma-sourcemap-loader": "^0.3.6",
-    "karma-spec-reporter": "0.0.23",
-    "karma-webpack": "^1.7.0",
-    "mocha": "^2.3.4",
-    "npm": "^3.5.2",
-    "sinon": "^1.17.2",
-    "webpack": "^1.12.9"
+    "neutrino": "^8.3.0",
+    "sinon": "^1.17.2"
+  },
+  "dependencies": {
+    "eventemitter3": "^3.1.0",
+    "invariant": "^2.2.0",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1"
   }
 }

@@ -12,6 +12,7 @@
 ./src
 
 [libs]
+./flow/
 
 [options]
 module.system=node
@@ -27,4 +28,4 @@ suppress_comment= \\(.\\|\n\\)*\\$FlowComputedProperty
 suppress_comment= \\(.\\|\n\\)*\\$FlowDynamicTypeCheckBug
 
 [version]
-0.66.0
+0.76.0

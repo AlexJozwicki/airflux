@@ -1,6 +1,7 @@
 /* @flow */
 import * as _ from './utils';
 import invariant from 'invariant';
+import EventEmitter from 'eventemitter3';
 
 export type UnsubscribeFunction = () => void;
 
@@ -12,36 +13,16 @@ export type UnsubscribeFunction = () => void;
  * - stores are inheriting from Listener
  */
 export default class Publisher {
-    emitter            : any;
+    _emitter: EventEmitter = new EventEmitter();
 
     /**
      * @protected
      */
     constructor() {
-        this.emitter = new _.EventEmitter();
     }
 
     get eventLabel() : string { return 'event'; }
-    get isPublisher() : boolean { return true; }
 
-
-    /**
-     * Hook used by the publisher that is invoked before emitting
-     * and before `shouldEmit`. The arguments are the ones that the action
-     * is invoked with. If this function returns something other than
-     * undefined, that will be passed on as arguments for shouldEmit and
-     * emission.
-     */
-    preEmit( args: any ) : ?Object {}
-
-    /**
-     * Hook used by the publisher after `preEmit` to determine if the
-     * event should be emitted with given arguments. This may be overridden
-     * in your application, default implementation always returns true.
-     *
-     * @returns {Boolean} true if event should be emitted
-     */
-    shouldEmit() : boolean { return true; }
 
     /**
      * @abstract
@@ -64,11 +45,11 @@ export default class Publisher {
             this.processResult( callback.apply( this, args ) );
         };
 
-        this.emitter.addListener( this.eventLabel, eventHandler );
+        this._emitter.addListener( this.eventLabel, eventHandler );
 
         return () => {
             aborted = true;
-            this.emitter.removeListener( this.eventLabel, eventHandler );
+            this._emitter.removeListener( this.eventLabel, eventHandler );
         };
     }
 
@@ -84,23 +65,16 @@ export default class Publisher {
     }
 
     /**
-     * Publishes an event using `this.emitter` (if `shouldEmit` agrees)
+     * Publishes an event using `this._emitter` (if `shouldEmit` agrees)
      */
     triggerSync( ...args: any ) {
-        var preResult = this.preEmit.apply( this, args );
-        if( typeof preResult !== 'undefined' ) {
-            args = _.isArguments(preResult) ? preResult : [].concat(preResult);
-        }
-
-        if( !this.shouldEmit.apply( this, args ) ) return;
-
-        this.emitter.emit( this.eventLabel, args );
+        this._emitter.emit( this.eventLabel, args );
     }
 
     /**
      * Tries to publish the event on the next tick
      */
     trigger( ...args: any ) {
-        _.nextTick( () => this.triggerSync.apply( this, args ) );
+        setTimeout( () => this.triggerSync( ...args ), 0 );
     }
 }

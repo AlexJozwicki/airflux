@@ -16,7 +16,7 @@ describe('Stopping',function(){
             assert.equal(store._subscriptions.length,1);
         });
     });
-    describe('a join',function(){
+/*    describe('a join',function(){
         var store = new Store(),
             action1 = new Action( true ).asFunction,
             action2 = new Action( true ).asFunction,
@@ -44,7 +44,7 @@ describe('Stopping',function(){
                 done();
             },10);
         });
-    });
+    });*/
     describe('a single listen', function(){
         describe('by calling stop directly',function(){
             describe('when all is well',function(){

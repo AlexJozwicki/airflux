@@ -13,7 +13,7 @@ import type Store                       from './Store';
 
 export type SubscriptionObj = {
     stop: Function;
-    listenable: (Publisher | Array< Publisher >);
+    listenable: ( Publisher | Array< Publisher > | ActionFunctor< any > );
 };
 
 
@@ -36,10 +36,10 @@ export default class Listener extends Publisher {
      */
     hasListener( listenable: Publisher ) : boolean {
         // flatten the listenables
-        const pubs : Array< Publisher > = this._subscriptions
+        const pubs : Array< Publisher | ActionFunctor< any > > = this._subscriptions
             .reduce( ( r, sub ) => r.concat( sub.listenable ), [] );
 
-        return pubs.some( pub => ( pub === listenable || ( typeof pub.hasListener === 'function' && pub.hasListener( listenable ) ) ) );
+        return pubs.some( pub => ( pub === listenable || ( pub instanceof Listener && pub.hasListener( listenable ) ) ) );
     }
 
 
@@ -52,7 +52,7 @@ export default class Listener extends Publisher {
     validateListening( listenable: Publisher | ActionFunctor< any > ) {
         invariant( listenable !== this, 'Listener is not able to listen to itself' );
         invariant( typeof listenable.listen === 'function', 'listenable should be a Publisher' );
-        invariant( !( typeof listenable.hasListener === 'function' && listenable.hasListener(this)), 'Listener cannot listen to this listenable because of circular loop' );
+        invariant( !( listenable instanceof Listener && listenable.hasListener(this)), 'Listener cannot listen to this listenable because of circular loop' );
     }
 
     /**
@@ -64,13 +64,13 @@ export default class Listener extends Publisher {
      *
      * @returns {Object} A subscription obj where `stop` is an unsub function and `listenable` is the object being listened to
      */
-    listenTo( listenable: Publisher | ActionFunctor< any >, callback: Function, defaultCallback: ?Function ) : SubscriptionObj  {
+    listenTo( listenable: Publisher | ActionFunctor< any >, callback: Function/*, defaultCallback: ?Function*/ ) : SubscriptionObj  {
         this.validateListening( listenable );
         invariant( callback != null, 'listenTo should be called with a valid callback' );
-
+/*
         if( !!defaultCallback )
             this.fetchInitialState( listenable, defaultCallback );
-
+*/
         var desub = listenable.listen( callback.bind( this ) );
         var unsubscriber = () => {
             var index = this._subscriptions.indexOf(subscriptionObj);
@@ -106,7 +106,7 @@ export default class Listener extends Publisher {
     /**
      * Adds a subscription
      */
-    addSubscription( stop: () => void, listenable: Publisher ) : SubscriptionObj {
+    addSubscription( stop: () => void, listenable: Publisher | ActionFunctor< any >, ) : SubscriptionObj {
         const subscriptionObj : SubscriptionObj = { stop, listenable };
         this._subscriptions.push( subscriptionObj );
         return subscriptionObj;
@@ -141,9 +141,10 @@ export default class Listener extends Publisher {
      * @param {Action|Store} listenable The publisher we want to get initial state from
      * @param {Function|String} defaultCallback The method to receive the data
      */
-    fetchInitialState( listenable: Publisher, defaultCallback: Function ) {
-        if( _.isFunction(defaultCallback) && listenable.state ) {
-            defaultCallback.call( this, listenable.state );
+    fetchInitialState( listenable: Store< any >, defaultCallback: Function ) {
+        if( _.isFunction( defaultCallback ) && !!listenable.state ) {
+            var defaultState = ( listenable instanceof Publisher ? listenable.state : null );
+            defaultCallback.call( this, defaultState );
         }
     }
 

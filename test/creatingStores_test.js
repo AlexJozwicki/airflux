@@ -207,76 +207,7 @@ describe('Creating stores', () => {
             return assert.eventually.deepEqual(promise, ['[...] 1337', '[...] ninja']);
         });
 
-        it('should get initial state from getter state', function() {
-            var store = new class extends baseStore {
-                get state() {
-                    return ['initial state'];
-                }
-            }();
-            var promise = createPromiseForTest(store);
-            return assert.eventually.equal(promise, '[...] initial state');
-        });
     });
-/*
-    describe("the listenToMany method",function(){
-        describe("when given a single object",function(){
-            var initialbarstate = "DEFAULTBARDATA",
-                initialbazstate = "DEFAULTBAZDATA",
-                listenables = {
-                    foo: {listen:sinon.spy()},
-                    bar: {
-                        listen:sinon.spy()
-                    },
-                    baz: {
-                        listen:sinon.spy()
-                    },
-                    missing: {
-                        listen:sinon.spy()
-                    }
-                };
-
-                var barState = sinon.stub().returns(initialbarstate);
-                var bazState = sinon.stub().returns(initialbazstate);
-                Object.defineProperty( listenables.bar, 'state', { get: barState } );
-                Object.defineProperty( listenables.baz, 'state', { get: bazState } );
-
-                class _cl extends Store {
-                    constructor() {
-                        super();
-                        this.listenToMany( listenables );
-                    }
-                }
-
-                _cl.prototype.onFoo = "methodFOO";
-                _cl.prototype.bar = sinon.spy();
-                _cl.prototype.onBaz = sinon.spy();
-                _cl.prototype.onBazDefault = sinon.spy();
-
-                var store = new _cl();
-
-            it("should listenTo all listenables with the corresponding callbacks",function(){
-                assert.deepEqual(listenables.foo.listen.firstCall.args,[store.onFoo,store]);
-                assert.deepEqual(listenables.bar.listen.firstCall.args,[store.bar,store]);
-                assert.deepEqual(listenables.baz.listen.firstCall.args,[store.onBaz,store]);
-            });
-
-            it("should not try to listen to actions without corresponding props in the store",function(){
-                assert.equal(listenables.missing.listen.callCount,0);
-            });
-
-            it("should call main callback if listenable has gettter state but listener has no default-specific cb",function(){
-                assert.equal(barState.callCount,2);
-                assert.equal(store.bar.firstCall.args[0],initialbarstate);
-            });
-
-            it("should call default callback if exist and listenable has getter state",function(){
-                assert.equal(bazState.callCount,2);
-                assert.equal(store.onBaz.callCount,0);
-                assert.equal(store.onBazDefault.firstCall.args[0],initialbazstate);
-            });
-        });
-    });
-*/
 
     describe('getters', function() {
         var didRun = false;
