@@ -68,6 +68,19 @@ export default class Action< Fn > extends Publisher {
         return this.asFunction;
     }
 
+    /**
+      * Creates a new action, that will be triggered only if the filter passes.
+      */
+    filter( filterFn: ( ...args: any[] ) => boolean ): Action< Fn > {
+        const filteredAction = new Action();
+
+        this.listen( ( ...args: any[] ) => {
+            if( filterFn( ...args ) ) filteredAction.trigger( ...args )
+        } );
+
+        return filteredAction;
+    }
+
 
     /**
      *

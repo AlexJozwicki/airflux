@@ -11,25 +11,27 @@ import type Store from './Store';
 import Environment from './Environment';
 import type { AirfluxApi } from './AirfluxApi';
 
-type QueryRendererProps = {
+
+type ConnectStoreProps = {
   environment?: Environment;
   render: ( stores: { [ name: string ]: any } ) => any;
   stores?: { [key: string ]: Store< any > };
+  query?: ( stores: { [ name: string ]: any } ) => { [ name: string ]: any };
 };
 
 
 
 /**
  */
-export default class QueryRenderer extends React.Component< QueryRendererProps, { [ name: string ]: any }> {
+export default class ConnectStore extends React.Component< ConnectStoreProps, { [ name: string ]: any }> {
     static contextTypes = { airflux: PropTypes.object };
 
     _listener: Listener = new Listener();
 
-    constructor( props: * ) {
+    constructor( props: ConnectStoreProps, context: any ) {
         super( props );
 
-        var publishers = this._getEnvironment().getPublishers();
+        var publishers = this._getEnvironment( props, context ).getPublishers();
 
         if( Object.keys( publishers ).length > 0 ) {
             this.state = Object.keys( publishers )
@@ -38,14 +40,19 @@ export default class QueryRenderer extends React.Component< QueryRendererProps, 
         }
     }
 
-    _getEnvironment(): Environment {
-        if( !!this.context && !!this.context.airflux ) {
-            return this.context.airflux.environment;
-        }
-        else if( !!this.props.environment )
-            return this.props.environment;
+    _getEnvironment( p?: ConnectStoreProps, c?: any ): Environment {
+        const props = p || this.props;
+        const context = c || this.context;
 
-        return new Environment( this.props.stores );
+        if( !!context && !!context.airflux ) {
+            return context.airflux.environment;
+        }
+        else if( !!props && !!props.environment ) {
+            return props.environment;
+        }
+        else {
+            return new Environment( props.stores );
+        }
     }
 
     getPublishers() : { [key: string ]: Store< any > } {
@@ -69,6 +76,7 @@ export default class QueryRenderer extends React.Component< QueryRendererProps, 
     }
 
     render() {
-        return this.props.render( this.state );
+        const query = this.props.query || ( ( a ) => a );
+        return this.props.render( query( this.state ) );
     }
 }

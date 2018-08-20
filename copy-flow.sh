@@ -1,0 +1,13 @@
+cp ./src/Action.js ./build/Action.js.flow
+cp ./src/AirfluxApi.js ./build/AirfluxApi.js.flow
+cp ./src/AirfluxApp.js ./build/AirfluxApp.js.flow
+cp ./src/AsyncResultAction.js ./build/AsyncResultAction.js.flow
+cp ./src/ConnectStore.jsx ./build/ConnectStore.jsx.flow
+cp ./src/Environment.js ./build/Environment.js.flow
+cp ./src/index.js ./build/index.js.flow
+cp ./src/Join.js ./build/Join.js.flow
+cp ./src/JoinStores.js ./build/JoinStores.js.flow
+cp ./src/Listener.js ./build/Listener.js.flow
+cp ./src/PromiseAction.js ./build/PromiseAction.js.flow
+cp ./src/Publisher.js ./build/Publisher.js.flow
+cp ./src/Store.js ./build/Store.js.flow

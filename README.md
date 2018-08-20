@@ -36,28 +36,110 @@ npm install airflux
 
 [Back to top](#content)
 
-## Yet another Flux library
 
-The Airflux project is a ES6 class-based fork of Reflux.
-The goal is to allow to create new projects entirely based on ES6 classes, both on the React side and Flux side.
+## Creating an action
 
-Having a class based approach allows to have a cleaner implementation of both the airflux library and the final application stores.
-As such, this project aims to be used only by React 0.13 ES6 style components and drops the support for mixins completely.
+```javascript
+import * as airflux                                     from 'airflux';
 
-The project is completely typed with Flow.
+const action = new airflux.Action();
+
+// action is an instance of a class by default. you can trigger it using function `triger`.
+action.trigger();
+
+// or create it as a function directly.
+const changeMessage: ( message: string ) => any = new airflux.Action().asFunction;
+changeMessage( 'hello world' );
+```
+
+## Creating a store
+
+The store is your data warehouse. Similar to actions, we’ll be creating a class for the store. A store holds only a state, and the syntax to change its state is the same as a React Component.
 
 
-### Similarities with Flux
+```javascript
+import * as airflux                                     from 'airflux';
 
-Some concepts are still in Airflux in comparison with Flux:
+export type TestStoreState = { message: string };
 
-* There are actions
-* There are data stores
-* The data flow is unidirectional
+class TestStoreState extends airflux.Store< TestStoreState > {
+    state = { message: 'Default state message' };
 
-[Back to top](#content)
+    constructor() {
+        super();
+    }
+}
+```
 
-## TL;DR
+You can then connect a store to an action. Actions in Flux are the way to propagate a mutation to all stores.
+
+
+```javascript
+import * as airflux                                     from 'airflux';
+
+export type TestStoreState = { message: string };
+
+class TestStore extends airflux.Store< TestStoreState > {
+    state = { message: 'Default state message' };
+
+    constructor() {
+        super();
+        this.listenTo( changeMessage, ( message ) => this.setState( { message } ) );
+    }
+}
+```
+
+In this example, once the action `changeMessage` is called, it will change the state of TestStore.
+
+## Connecting your component
+
+Connecting your component to a store should be made using dedicated component ConnectStore.
+
+
+```javascript
+import * as airflux                                     from 'airflux';
+
+const stores = {
+    testStore: new TestStore()
+};
+
+
+class App extends React.Component {
+    render() {
+        return (
+            <airflux.ConnectStore stores={ stores } render={ ( { testStore } ) => <h1>{ testStore.message }</h1> }/>
+        )
+    }
+}
+```
+
+## Creating an environment
+
+Stores can be injected throughout the whole app using the environment concept. Using this principle, the application can initialize all stores in one environment. ConnectStore will automatically use this environment, anywhere in your application.
+
+
+```javascript
+import * as airflux                                     from 'airflux';
+
+const environment = new airflux.Environment( {
+    testStore: new TestStore()
+} );
+
+
+
+class App extends React.Component {
+    render() {
+        return (
+            <airflux.AirfluxApp environment={ environment }>
+                <airflux.ConnectStore render={ ( { testStore } ) => <h1>{ testStore.message }</h1> }/>
+            </airflux.AirfluxApp>
+        )
+    }
+}
+```
+
+
+## Full Example
 
 ```javascript
 import * as airflux                                     from 'airflux';
@@ -107,18 +189,8 @@ class ResultsStore extends airflux.Store {
 const resultsStore = new resultsStore();
 
 
-@airflux.FluxComponent
-class Results extends React.Component {
-    state: { searchStore: $PropertyType< SearchStore, 'state' >, resultsStore: $PropertyType< ResultsStore, 'state' > };
-
-
-    constructor( props: *, context: * ) {
-        super( props, context );
-        this.connectStore( searchStore, 'searchStore' );
-        this.connectStore( resultsStore, 'resultsStore' );
-    }
-
-    get resultsFiltered() : Result[] { return this.state.resultsStore.resultsFiltered; }
+class Results extends React.Component< { results: { results: Result[], resultsFiltered: Result[] }, searchStore: any } > {
+    get resultsFiltered() : Result[] { return this.props.results.resultsFiltered; }
 
     componentWillMount() {
         search( 'a search' );
@@ -127,20 +199,16 @@ class Results extends React.Component {
     render() {
         return (
             <div>
-                <input type="text" value={ this.state.searchStore.search } onChange={ search } />
-                The search is : { this.state.searchStore.search }
+                <input type="text" value={ this.props.searchStore.search } onChange={ search } />
+                The search is : { this.props.searchStore.search }
                 { this.resultsFiltered.map( r => <ResultLine result={ r } /> ) }
             </div>
         );
     }
 }
+
+const ResultsContainer = ( props ) => <airflux.ConnectStore stores={ { resultsStores } } render={ ( { resultsStores, searchStore } ) => <Results {...props} results={ resultsStores } searchStore={ searchStore } /> } />;
 ```
-
-## More Examples
-
-TODO
-
-[Back to top](#content)
 
 
 ## Actions
