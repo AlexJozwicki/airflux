@@ -273,7 +273,7 @@ There is a shorthand to define the `completed` and `failed` actions in the typic
 ```javascript
 new airflux.Action().withChildren( [ 'progressed', 'completed', 'failed' ] );
 
-new airflux.Action().asyncResult().withChilren( [ 'progressed ' ] );
+new airflux.Action().asyncResult().withChildren( [ 'progressed ' ] );
 ```
 
 There are a couple of helper methods available to trigger the `completed` and `failed` actions:
